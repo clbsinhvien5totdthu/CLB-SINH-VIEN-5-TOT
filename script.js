@@ -51,6 +51,8 @@ function initNavbar() {
     menuBtn.setAttribute("aria-expanded", String(open));
   });
   qsa(".mobile-menu a").forEach(link => link.addEventListener("click", closeMenu));
+  document.addEventListener("keydown", e => { if (e.key === "Escape") closeMenu(); });
+  document.addEventListener("click", e => { if (!e.target.closest(".site-header")) closeMenu(); });
   // Đăng ký với vòng scroll gộp chung (xem initScrollLoop) thay vì tự thêm
   // listener riêng — tránh nhiều listener cùng đọc/ghi layout mỗi lần cuộn.
   onScroll(() => header?.classList.toggle("scrolled", scrollY > 20));
@@ -142,6 +144,12 @@ function initFAQ() {
       list[(to + list.length) % list.length].focus();
     });
   });
+  const openFromHash = () => {
+    const t = location.hash.length > 1 && document.getElementById(decodeURIComponent(location.hash.slice(1)));
+    if (t && setters.has(t)) setters.forEach((fn, other) => fn(other === t));
+  };
+  openFromHash();
+  window.addEventListener("hashchange", openFromHash);
   window.addEventListener("resize", () =>
     qsa(".faq-item.open .faq-answer").forEach(a => { a.style.height = `${a.scrollHeight}px`; }), { passive: true });
 }
@@ -614,25 +622,8 @@ function initBackgroundMusic() {
      BẤM "BẮT ĐẦU HÀNH TRÌNH"
   ========================================= */
  
-  if (startButton) {
-    startButton.addEventListener("click", async () => {
- 
-      // Bật nhạc ngay trong chính user interaction
-      await startMusic();
- 
-      // Đóng intro
-      if (intro) {
-        intro.classList.add("hidden");
- 
-        setTimeout(() => {
-          intro.remove();
-        }, 1000);
-      }
- 
-      // Cho phép body scroll lại
-      document.body.classList.remove("intro-active");
-    });
-  }
+  // Bật nhạc ngay trong thao tác bấm, KHÔNG await: không bắt người dùng chờ tải mp3. Đóng intro do initIntro() lo.
+  startButton?.addEventListener("click", () => { startMusic(); });
  
   /* =========================================
      NÚT NHẠC
@@ -664,33 +655,20 @@ function initBackgroundMusic() {
 }
 
 /* ---------- BAN CHỦ NHIỆM: dữ liệu ----------
-   Mỗi nhiệm kỳ = 1 kệ. Mỗi thành viên = 1 khung ảnh vuông: [chức vụ, họ tên, đường dẫn ảnh vuông].
-   Thêm người = thêm 1 dòng vào members; thêm nhiệm kỳ = thêm 1 object. */
+   Mỗi nhiệm kỳ = 1 bức tường: các khung ảnh nhỏ (thường 9 người) + 1 kệ treo (lá thư + mascot).
+   Đổi tên: điền names theo đúng thứ tự BCN_ROLES. Ảnh: assets/bcn/<id>/<slug>.jpg (thiếu ảnh sẽ hiện chữ cái đầu).
+   Thêm/bớt người: sửa BCN_ROLES (dùng chung) hoặc khai báo members:[[chức vụ, tên, ảnh],...] riêng cho 1 nhiệm kỳ.
+   Mascot dùng chung: assets/mascot.png. Thêm nhiệm kỳ = thêm 1 object vào BCN_TERMS. */
+const BCN_ROLES = [
+  ["Chủ nhiệm", "chu-nhiem"], ["Phó Chủ nhiệm", "pho-chu-nhiem"], ["Phó Chủ nhiệm", "pho-chu-nhiem-2"],
+  ["Trưởng ban Truyền thông", "truong-ban-1"], ["Trưởng ban Sự kiện", "truong-ban-2"],
+  ["Thành viên BCN", "thanh-vien-1"], ["Thành viên BCN", "thanh-vien-2"],
+  ["Thành viên BCN", "thanh-vien-3"], ["Thành viên BCN", "thanh-vien-4"]
+];
 const BCN_TERMS = [
-  { id: "2022-2023", period: "Nhiệm kỳ 2022 – 2023",
-    members: [
-      ["Chủ nhiệm", "[Họ và tên]", "assets/bcn/2022-2023/chu-nhiem.jpg"],
-      ["Phó Chủ nhiệm", "[Họ và tên]", "assets/bcn/2022-2023/pho-chu-nhiem.jpg"],
-      ["Trưởng ban Truyền thông", "[Họ và tên]", "assets/bcn/2022-2023/truong-ban-1.jpg"],
-      ["Trưởng ban Sự kiện", "[Họ và tên]", "assets/bcn/2022-2023/truong-ban-2.jpg"]
-    ],
-    letter: ["[Thay bằng nội dung bức thư của Ban chủ nhiệm nhiệm kỳ 2022 – 2023.]", "Mỗi đoạn là một phần tử trong mảng letter."] },
-  { id: "2023-2024", period: "Nhiệm kỳ 2023 – 2024",
-    members: [
-      ["Chủ nhiệm", "[Họ và tên]", "assets/bcn/2023-2024/chu-nhiem.jpg"],
-      ["Phó Chủ nhiệm", "[Họ và tên]", "assets/bcn/2023-2024/pho-chu-nhiem.jpg"],
-      ["Trưởng ban Truyền thông", "[Họ và tên]", "assets/bcn/2023-2024/truong-ban-1.jpg"],
-      ["Trưởng ban Sự kiện", "[Họ và tên]", "assets/bcn/2023-2024/truong-ban-2.jpg"]
-    ],
-    letter: ["[Thay bằng nội dung bức thư của Ban chủ nhiệm nhiệm kỳ 2023 – 2024.]"] },
-  { id: "2024-2025", period: "Nhiệm kỳ 2024 – 2025",
-    members: [
-      ["Chủ nhiệm", "[Họ và tên]", "assets/bcn/2024-2025/chu-nhiem.jpg"],
-      ["Phó Chủ nhiệm", "[Họ và tên]", "assets/bcn/2024-2025/pho-chu-nhiem.jpg"],
-      ["Trưởng ban Truyền thông", "[Họ và tên]", "assets/bcn/2024-2025/truong-ban-1.jpg"],
-      ["Trưởng ban Sự kiện", "[Họ và tên]", "assets/bcn/2024-2025/truong-ban-2.jpg"]
-    ],
-    letter: ["[Thay bằng nội dung bức thư của Ban chủ nhiệm nhiệm kỳ 2024 – 2025.]"] }
+  { id: "2022-2023", names: [], letter: ["[Thay bằng nội dung bức thư của Ban chủ nhiệm nhiệm kỳ 2022 – 2023.]", "Mỗi đoạn là một phần tử trong mảng letter."] },
+  { id: "2023-2024", names: [], letter: ["[Thay bằng nội dung bức thư của Ban chủ nhiệm nhiệm kỳ 2023 – 2024.]"] },
+  { id: "2024-2025", names: [], letter: ["[Thay bằng nội dung bức thư của Ban chủ nhiệm nhiệm kỳ 2024 – 2025.]"] }
 ];
 
 function el(tag, cls, text) {
@@ -712,86 +690,112 @@ function bcnPhoto(src, name) {
 }
 
 function initBCN() {
-  const hall = qs("#bcnHall"), panel = qs("#bcnPanel"), overlay = qs("#bcnOverlay");
-  if (!hall || !panel || !overlay) return;
-  const closeBtn = qs(".bcn-close", panel);
-  let lastTrigger = null;
-
+  const hall = qs("#bcnHall"), zoom = qs("#bcnZoom");
+  if (!hall || !zoom) return;
+  const stage = qs(".bcn-stage", zoom), closeBtn = qs(".bcn-close", zoom);
+  const prev = qs(".bcn-prev", zoom), next = qs(".bcn-next", zoom);
   const envelope = '<svg viewBox="0 0 64 48" aria-hidden="true"><rect x="2" y="6" width="60" height="40" rx="4" fill="#fffaf0" stroke="#a9722f" stroke-width="2"/><path d="M4 9l28 21L60 9" fill="none" stroke="#a9722f" stroke-width="2"/><circle cx="32" cy="30" r="6" fill="#e0503c"/></svg>';
+  let items = [], at = 0, trigger = null, timer = 0;
 
-  BCN_TERMS.forEach((t, i) => {
-    const room = el("section", "bcn-room");
-    const shelf = el("button", "shelf");
-    shelf.type = "button";
-    shelf.dataset.index = i;
-    shelf.setAttribute("aria-haspopup", "dialog");
-    shelf.setAttribute("aria-label", `Mở ${t.period}`);
-    const row = el("span", "shelf-row");
-    const letter = el("span", "shelf-letter");
-    letter.innerHTML = envelope;
-    letter.appendChild(el("small", "", "Lá thư"));
-    const frames = el("span", "shelf-frames");
-    t.members.forEach(([role, name, src]) => frames.appendChild(bcnPhoto(src, name)));
-    const mascot = el("span", "shelf-mascot");
-    const m = el("img"); m.src = "assets/mascot.png"; m.alt = "Mascot CLB"; m.loading = "lazy";
-    m.addEventListener("error", () => { m.remove(); mascot.classList.add("no-img"); });
-    mascot.appendChild(m);
-    row.append(letter, frames, mascot);
-    shelf.append(el("span", "shelf-plate", t.period), row, el("span", "shelf-board"));
-    shelf.addEventListener("click", () => open(i, shelf));
-    room.appendChild(shelf);
-    hall.appendChild(room);
+  /* Mascot: thiếu ảnh thì hiện hình tròn vàng có số 5 */
+  const mascot = cls => {
+    const s = el("span", `bcn-mascot ${cls}`), m = el("img");
+    m.src = "assets/mascot.png"; m.alt = "Mascot CLB Sinh viên 5 Tốt"; m.decoding = "async";
+    m.addEventListener("error", () => { m.remove(); s.classList.add("no-img"); });
+    s.appendChild(m); return s;
+  };
+
+  BCN_TERMS.forEach(t => {
+    const period = `Nhiệm kỳ ${t.id.replace("-", " – ")}`;
+    const members = t.members || BCN_ROLES.map(([role, slug], i) => [role, t.names?.[i] || "[Họ và tên]", `assets/bcn/${t.id}/${slug}.jpg`]);
+    const room = el("section", "bcn-room"), wall = el("div", "bcn-wall");
+    const frames = el("div", "bcn-frames"), shelf = el("div", "bcn-shelf");
+    room.setAttribute("aria-label", period);
+    const list = [];
+    /* mỗi "vật" trên tường là 1 nút; build() trả về nội dung hiển thị khi phóng to */
+    const add = (btn, label, build) => {
+      btn.type = "button"; btn.setAttribute("aria-label", label); btn.setAttribute("aria-haspopup", "dialog");
+      const item = { btn, build };
+      list.push(item);
+      btn.addEventListener("click", () => open(list, item, btn));
+      return btn;
+    };
+    members.forEach(([role, name, src]) => {
+      const b = el("button", "bcn-frame");
+      b.append(bcnPhoto(src, name), el("span", "bcn-tag", name));
+      frames.appendChild(add(b, `Phóng to ảnh: ${name} – ${role}`, () => [bcnPhoto(src, name), el("h2", "", name), el("p", "", `${role} · ${period}`)]));
+    });
+    const lb = el("button", "bcn-obj"); lb.innerHTML = envelope; lb.appendChild(el("small", "", "Lá thư"));
+    add(lb, `Mở lá thư ${period}`, () => {
+      const paper = el("div", "bcn-paper");
+      (t.letter || []).forEach(p => paper.appendChild(el("p", "", p)));
+      return [el("h2", "", "Thư gửi thế hệ sau"), el("p", "", period), paper];
+    });
+    const mb = el("button", "bcn-obj"); mb.append(mascot("bcn-mascot-sm"), el("small", "", "Mascot"));
+    add(mb, `Phóng to mascot ${period}`, () => [mascot("bcn-mascot-big"), el("h2", "", "Mascot CLB"), el("p", "", period)]);
+    shelf.append(lb, mb, el("span", "bcn-shelf-board"));
+    wall.append(el("span", "shelf-plate", period), frames, shelf);
+    room.appendChild(wall); hall.appendChild(room);
   });
 
-  function open(i, trigger) {
-    const t = BCN_TERMS[i];
-    lastTrigger = trigger;
-    qsa(".shelf.is-active").forEach(s => s.classList.remove("is-active"));
-    trigger.classList.add("is-active");
-    qs("#bcnPeriod").textContent = "Hành lang kỷ niệm";
-    qs("#bcnTitle").textContent = t.period;
-    const gallery = qs("#bcnGallery"); gallery.replaceChildren();
-    t.members.forEach(([role, name, src]) => {
-      const fig = el("figure", "bcn-person");
-      fig.append(bcnPhoto(src, name), el("figcaption", "", ""));
-      const cap = fig.lastChild; cap.append(el("strong", "", name), el("span", "", role));
-      gallery.appendChild(fig);
-    });
-    const letter = qs("#bcnLetter"); letter.replaceChildren();
-    t.letter.forEach(p => letter.appendChild(el("p", "", p)));
-    overlay.hidden = false;
+  function render() {
+    stage.replaceChildren(...items[at].build());
+    stage.scrollTop = 0;
+    prev.hidden = next.hidden = items.length < 2;
+  }
+  function open(list, item, btn) {
+    clearTimeout(timer);                       /* mở lại ngay khi đang đóng: không bị ẩn nhầm */
+    items = list; at = list.indexOf(item); trigger = btn;
+    const r = btn.getBoundingClientRect();     /* phóng to từ đúng vị trí vật được bấm */
+    stage.style.setProperty("--dx", `${r.left + r.width / 2 - innerWidth / 2}px`);
+    stage.style.setProperty("--dy", `${r.top + r.height / 2 - innerHeight / 2}px`);
+    render();
+    zoom.hidden = false; void zoom.offsetWidth;
+    zoom.classList.add("show");
     document.body.classList.add("bcn-lock");
-    requestAnimationFrame(() => {
-      overlay.classList.add("show");
-      panel.classList.add("open");
-      panel.setAttribute("aria-hidden", "false");
-      panel.scrollTop = 0;
-      closeBtn?.focus({ preventScroll: true });
-    });
+    closeBtn.focus({ preventScroll: true });
   }
-
   function close() {
-    if (!panel.classList.contains("open")) return;
-    panel.classList.remove("open");
-    panel.setAttribute("aria-hidden", "true");
-    overlay.classList.remove("show");
+    if (zoom.hidden || !zoom.classList.contains("show")) return;
+    zoom.classList.remove("show");
     document.body.classList.remove("bcn-lock");
-    qsa(".shelf.is-active").forEach(s => s.classList.remove("is-active"));
-    setTimeout(() => { overlay.hidden = true; }, 320);
-    lastTrigger?.focus({ preventScroll: true });
+    timer = setTimeout(() => { zoom.hidden = true; }, reducedMotion ? 0 : 380);
+    trigger?.focus({ preventScroll: true });
   }
+  const step = d => { at = (at + d + items.length) % items.length; render(); };
 
-  closeBtn?.addEventListener("click", close);
-  overlay.addEventListener("click", close);
+  closeBtn.addEventListener("click", close);
+  prev.addEventListener("click", () => step(-1));
+  next.addEventListener("click", () => step(1));
+  zoom.addEventListener("click", e => { if (e.target === zoom) close(); });
   document.addEventListener("keydown", e => {
-    if (!panel.classList.contains("open")) return;
-    if (e.key === "Escape") { close(); return; }
+    if (zoom.hidden || !zoom.classList.contains("show")) return;
+    if (e.key === "Escape") return close();
+    if (e.key === "ArrowLeft" && items.length > 1) return step(-1);
+    if (e.key === "ArrowRight" && items.length > 1) return step(1);
     if (e.key !== "Tab") return;
-    const f = qsa("button, a[href]", panel);
-    if (!f.length) return;
-    const first = f[0], last = f[f.length - 1];
+    const f = qsa("button:not([hidden])", zoom), first = f[0], last = f[f.length - 1];
     if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
     else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+  });
+}
+
+/* Intro: chỉ hiện 1 lần mỗi phiên (quay lại "Trang chủ" không bị chặn nữa), đóng ngay khi bấm,
+   và khóa Tab vào nội dung phía sau khi intro còn mở. */
+function initIntro() {
+  const intro = qs("#intro-screen"), btn = qs("#startExperience");
+  if (!intro) return;
+  const page = qsa("header.site-header, main, footer");
+  const finish = () => { document.body.classList.remove("intro-active"); page.forEach(n => { n.inert = false; }); };
+  let seen = false;
+  try { seen = sessionStorage.getItem("introSeen") === "1"; } catch {}
+  if (seen) { intro.remove(); finish(); return; }
+  page.forEach(n => { n.inert = true; });
+  btn?.focus({ preventScroll: true });
+  btn?.addEventListener("click", () => {
+    try { sessionStorage.setItem("introSeen", "1"); } catch {}
+    intro.classList.add("hidden"); finish();
+    setTimeout(() => intro.remove(), 1000);
   });
 }
 
@@ -825,7 +829,7 @@ function init() {
     initSocialHub, initMagneticButtons, initConfettiBurst, initCardTilt,
     initParallax, initParticles, initScrollProgress, initBackToTop,
     initActiveNavigation, initReducedMotion, initLoading, initLazyImages,
-    initMissingAssets, initBCN, initVisibilityPause, initBackgroundMusic
+    initMissingAssets, initIntro, initBCN, initVisibilityPause, initBackgroundMusic
   ].forEach(fn => {
     try { fn(); } catch (err) { console.warn(`[${fn.name}]`, err); }
   });
