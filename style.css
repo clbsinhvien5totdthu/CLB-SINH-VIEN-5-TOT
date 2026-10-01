@@ -3138,3 +3138,1143 @@ body.bcn-lock { overflow: hidden; }
 .menu-toggle, .back-top { min-width: 44px; }
 .button-ghost { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 0 22px; border: 1px solid rgba(255,255,255,.35); border-radius: 999px; color: #fff; text-decoration: none; font-weight: 700; }
 .section, .faq-section, .social-section, .final-cta { position: relative; overflow-x: clip; }
+/* [CẬP NHẬT] File này vẫn là LỚP PATCH: dán vào CUỐI style.css gốc (không tải kèm).
+   Đã thêm ở cuối: D. Hero trang chủ · E. Trang Ban chủ nhiệm · F. Mobile/Accessibility.
+   =====================================================================
+   PATCH CHO "style (7).css"
+   ---------------------------------------------------------------------
+   CÁCH DÙNG: dán TOÀN BỘ file này vào CUỐI file style.css (sau cùng,
+   để thắng các rule cũ). Không cần xoá gì trong file cũ để chạy đúng.
+
+   Gồm 3 phần:
+     A. FIX LỖI CUỘN DƯ (overscroll)            -> Mục tiêu 2
+     B. SOLAR SYSTEM HUB (trang chủ)            -> Mục tiêu 1
+     C. TEMPLATE TRANG TIÊU CHÍ "VÌ SAO"        -> Mục tiêu 3
+
+   (Tuỳ chọn) Sau khi test ổn, có thể xoá khối cũ "FIX: 5 TIÊU CHÍ
+   DESKTOP" … "ORBIT SYSTEM" (khoảng dòng 24 → 512 của file cũ, ngay
+   trước "INTRO SCREEN") vì không còn phần tử .pillars-wrap /
+   .pillar-card / .pillar-center trong index.html mới.
+   ===================================================================== */
+
+
+/* =====================================================================
+   A. FIX LỖI CUỘN DƯ KHÔNG GIAN Ở CUỐI TRANG
+   ===================================================================== */
+
+/* [NGUYÊN NHÂN GỐC]
+   .hero và .final-cta KHÔNG có position:relative. Các lớp trang trí bên
+   trong (.hero-bg-grid, .cta-mesh, .cta-ring, .cta-orb, canvas) lại là
+   position:absolute -> chúng neo vào khung nhìn đầu trang (initial
+   containing block) chứ không neo vào section cha. Hệ quả:
+     - overflow:hidden của .hero/.final-cta KHÔNG cắt được chúng;
+     - chúng tràn ra ngoài (đo thực tế: tài liệu rộng 4055px trên màn
+       1440px, 1585px trên màn 390px) => trình duyệt (nhất là điện thoại)
+       phải thu nhỏ/kéo rộng vùng cuộn => hiện vùng đen thừa + thanh cuộn
+       ngang ở dưới cùng.
+   [CÁCH SỬA] cho 2 section này làm "khung neo" + cắt phần tràn. */
+.hero,
+.final-cta,
+.hub {
+  position: relative;
+  overflow: hidden;
+}
+
+/* Lưới an toàn: dù sau này có thêm lớp trang trí nào tràn, cũng bị cắt ở
+   cấp <main>/<footer> (overflow-x:clip không tạo vùng cuộn mới, khác với
+   hidden; dòng hidden đứng trước là fallback cho trình duyệt cũ). */
+main,
+.footer {
+  overflow-x: hidden;
+  overflow-x: clip;
+}
+
+body {
+  overflow-x: hidden;
+  overflow-x: clip;
+  max-width: 100%;
+  /* Nền thật đặt ở <html> bên dưới; body để trong suốt để vùng "kéo giãn"
+     (rubber-band) ở mép dưới trang cùng màu với footer, không lộ dải đen
+     khác màu. body:before (gradient cố định) vẫn hiển thị bình thường. */
+  background: transparent;
+}
+
+html {
+  background: #04101f;        /* trùng màu .footer */
+  scroll-padding-top: 84px;   /* anchor (#...) không bị header cố định che */
+}
+
+/* URL dài (TikTok) trong footer làm cột grid giãn ra -> tràn ngang trên
+   điện thoại. Cho phép bẻ dòng. */
+.footer-contact a,
+.footer-contact p {
+  overflow-wrap: anywhere;
+}
+.footer-grid > * {
+  min-width: 0; /* cho phép cột grid co lại thay vì bị nội dung đẩy rộng */
+}
+
+
+/* =====================================================================
+   B. SOLAR SYSTEM HUB — TRANG CHỦ DẠNG TRẠM CHUYỂN HƯỚNG
+   ---------------------------------------------------------------------
+   Cấu trúc (xem index.html):
+     .hub
+       .hub-stars / .hero-bg-grid     nền vũ trụ
+       .hub-head                      tiêu đề
+       .solar-system
+         .solar-core                  điểm gốc (0,0) = tâm hệ
+           .sys-ring ×3               quỹ đạo trang trí
+           .sun                       MẶT TRỜI = logo CLB
+           ol.orbit                   vòng quay chung
+             li.planet-slot ×5        đặt hành tinh ở góc a trên quỹ đạo
+               a.planet               HÀNH TINH (thẻ <a> -> trang tiêu chí)
+       .hub-foot                      gợi ý thao tác
+   ===================================================================== */
+
+/* Cho phép "tween" bán kính quỹ đạo từ 0 -> 1: các hành tinh bay ra khỏi
+   mặt trời đúng lúc bấm "BẮT ĐẦU HÀNH TRÌNH". Trình duyệt chưa hỗ trợ
+   @property thì bỏ qua hiệu ứng, bố cục vẫn đúng. */
+@property --spread {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 1;
+}
+
+.hub {
+  isolation: isolate;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(8px, 1.6vh, 18px);
+  padding: 92px 0 36px;
+  color: #fff;
+  background:
+    radial-gradient(ellipse 60% 55% at 50% 58%, rgba(22,119,255,.24), transparent 70%),
+    radial-gradient(ellipse 45% 40% at 14% 8%,  rgba(124,58,237,.15), transparent 70%),
+    #061426;
+}
+@supports (min-height: 100svh) {
+  .hub { min-height: 100svh; }
+}
+
+/* Sao nền: 2 lớp lặp (tile) nhấp nháy rất nhẹ, chỉ animate opacity nên rẻ */
+.hub-stars,
+.hub-stars::after {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-repeat: repeat;
+}
+.hub-stars {
+  z-index: 0;
+  background-size: 520px 520px;
+  background-image:
+    radial-gradient(1.3px 1.3px at 12% 18%, rgba(255,255,255,.9), transparent 60%),
+    radial-gradient(1px   1px   at 78% 12%, rgba(190,235,255,.85), transparent 60%),
+    radial-gradient(1.6px 1.6px at 34% 72%, rgba(255,255,255,.75), transparent 60%),
+    radial-gradient(1px   1px   at 88% 64%, rgba(255,255,255,.8), transparent 60%),
+    radial-gradient(1.3px 1.3px at 56% 38%, rgba(200,220,255,.75), transparent 60%),
+    radial-gradient(1px   1px   at 6%  86%, rgba(255,255,255,.7), transparent 60%),
+    radial-gradient(1.4px 1.4px at 66% 92%, rgba(190,235,255,.8), transparent 60%);
+  animation: starTwinkle 7s ease-in-out infinite alternate;
+}
+.hub-stars::after {
+  content: "";
+  background-size: 760px 760px;
+  background-position: 180px 90px;
+  background-image:
+    radial-gradient(1px   1px   at 22% 30%, rgba(255,255,255,.7), transparent 60%),
+    radial-gradient(1.5px 1.5px at 70% 22%, rgba(190,235,255,.7), transparent 60%),
+    radial-gradient(1px   1px   at 48% 80%, rgba(255,255,255,.65), transparent 60%),
+    radial-gradient(1.2px 1.2px at 90% 76%, rgba(255,255,255,.7), transparent 60%);
+  animation: starTwinkle 9s ease-in-out infinite alternate-reverse;
+}
+@keyframes starTwinkle {
+  from { opacity: .45; }
+  to   { opacity: 1; }
+}
+
+/* ---- Tiêu đề ---- */
+.hub-head {
+  position: relative;
+  z-index: 3;
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  max-width: 760px;
+  text-align: center;
+}
+.hub-title {
+  margin: 6px 0 0;
+  font: 700 clamp(34px, 4.6vw, 58px)/.98 "Space Grotesk", sans-serif;
+  letter-spacing: -.05em;
+}
+.hub-title .nw { white-space: nowrap; }   /* "CLB SINH VIÊN" không bị ngắt giữa chừng */
+.hub-title em {
+  white-space: nowrap;           /* "5 TỐT" luôn đi liền nhau */
+  font-style: normal;
+  background: linear-gradient(100deg, #fff 0%, var(--cyan) 45%, #648dff 72%, #a278ff 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.hub-lead {
+  margin: 0;
+  max-width: 620px;
+  font-size: clamp(13px, 1.3vw, 15px);
+  line-height: 1.7;
+  color: #b3c5db;
+}
+
+/* ---- Khung hệ mặt trời: kích thước co giãn theo chiều cao màn hình ----
+   --R   bán kính quỹ đạo
+   --p   đường kính hành tinh
+   --sun đường kính mặt trời                                              */
+.solar-system {
+  --R:   clamp(160px, min(calc((100vh - 410px) / 2.44), 30vw), 270px);
+  --p:   clamp(78px,  calc(var(--R) * .44), 118px);
+  --sun: clamp(124px, calc(var(--R) * .64), 176px);
+  position: relative;
+  z-index: 2;
+  flex: none;
+  width:  calc(var(--R) * 2 + var(--p) + 90px);
+  height: calc(var(--R) * 2 + var(--p) + 96px);
+}
+@supports (height: 100svh) {
+  .solar-system {
+    --R: clamp(160px, min(calc((100svh - 410px) / 2.44), 30vw), 270px);
+  }
+}
+
+/* Điểm gốc (0,0) của hệ = tâm mặt trời */
+.solar-core {
+  --spread: 1;
+  position: absolute;
+  left: 50%;
+  top: calc(var(--R) + var(--p) / 2 + 18px);
+  width: 0;
+  height: 0;
+  transition: --spread 1.9s var(--ease);
+}
+/* Đang ở màn hình intro: các hành tinh nằm gọn trong mặt trời,
+   khi bỏ class intro-active -> bay ra quỹ đạo */
+body.intro-active .solar-core {
+  --spread: 0;
+  transition: none;
+}
+
+/* ---- Quỹ đạo trang trí ---- */
+.sys-ring {
+  position: absolute;
+  left: calc(var(--d) / -2);
+  top:  calc(var(--d) / -2);
+  width: var(--d);
+  height: var(--d);
+  border-radius: 50%;
+  pointer-events: none;
+}
+.sys-ring-1 {            /* đúng quỹ đạo của 5 hành tinh */
+  --d: calc(var(--R) * 2 * var(--spread));
+  border: 1px solid rgba(120,184,255,.22);
+  box-shadow: 0 0 60px rgba(22,119,255,.10), inset 0 0 60px rgba(34,211,238,.05);
+}
+.sys-ring-2 {            /* vòng ngoài + vệ tinh nhỏ */
+  --d: calc(var(--R) * 2.5 * var(--spread));
+  border: 1px dashed rgba(167,139,250,.18);
+  animation: ringSpin 150s linear infinite;
+}
+.sys-ring-2::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: -3px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--cyan);
+  box-shadow: 0 0 12px var(--cyan);
+}
+.sys-ring-3 {            /* vòng trong */
+  --d: calc(var(--R) * 1.4 * var(--spread));
+  border: 1px dotted rgba(34,211,238,.20);
+  animation: ringSpin 90s linear infinite reverse;
+}
+@keyframes ringSpin { to { transform: rotate(360deg); } }
+
+/* ---- MẶT TRỜI = LOGO CLB (glow + pulse liên tục) ---- */
+.sun {
+  position: absolute;
+  left: calc(var(--sun) / -2);
+  top:  calc(var(--sun) / -2);
+  width: var(--sun);
+  height: var(--sun);
+  border-radius: 50%;
+  z-index: 2;
+  outline: none;
+}
+.sun-glow {                /* quầng sáng thở – chỉ animate transform/opacity */
+  position: absolute;
+  inset: -70%;
+  border-radius: 50%;
+  pointer-events: none;
+  background: radial-gradient(circle,
+    rgba(34,211,238,.42) 0, rgba(22,119,255,.20) 36%, transparent 66%);
+  animation: sunBreath 4.2s ease-in-out infinite;
+}
+.sun-corona {              /* vành lửa xoay chậm */
+  position: absolute;
+  inset: -14%;
+  border-radius: 50%;
+  pointer-events: none;
+  background: conic-gradient(from 0deg,
+    transparent 0 6%, rgba(34,211,238,.7) 14%, transparent 28%,
+    rgba(167,139,250,.55) 52%, transparent 66%,
+    rgba(77,155,255,.7) 84%, transparent 96%);
+  -webkit-mask: radial-gradient(circle, transparent 60%, #000 62% 68%, transparent 72%);
+          mask: radial-gradient(circle, transparent 60%, #000 62% 68%, transparent 72%);
+  animation: ringSpin 14s linear infinite;
+}
+.sun-body {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: radial-gradient(circle at 36% 30%,
+    rgba(255,255,255,.42), rgba(34,211,238,.26) 32%,
+    rgba(22,119,255,.30) 60%, rgba(8,26,48,.92) 100%);
+  border: 1px solid rgba(160,230,255,.55);
+  box-shadow:
+    0 0 36px rgba(34,211,238,.45),
+    0 0 90px rgba(22,119,255,.35),
+    inset 0 0 34px rgba(34,211,238,.28);
+  transition: transform .45s var(--ease), box-shadow .45s;
+}
+.sun-body::after {         /* sóng lan toả liên tục */
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid rgba(34,211,238,.55);
+  pointer-events: none;
+  animation: sunWave 3.4s ease-out infinite;
+}
+.sun-body img {
+  width: 68%;
+  height: 68%;
+  object-fit: contain;
+  filter: drop-shadow(0 0 14px rgba(34,211,238,.65));
+  transition: transform .45s var(--ease);
+}
+@keyframes sunBreath {
+  0%, 100% { transform: scale(.92); opacity: .75; }
+  50%      { transform: scale(1.08); opacity: 1; }
+}
+@keyframes sunWave {
+  0%   { transform: scale(1);    opacity: .7; }
+  100% { transform: scale(1.85); opacity: 0; }
+}
+
+/* ---- VÒNG QUAY CHUNG + HÀNH TINH ----
+   Cả 5 hành tinh cùng quay 1 vòng (90s) nên luôn cách đều 72°, không bao
+   giờ chồng lên nhau. Mỗi hành tinh quay ngược lại cùng tốc độ để thẻ
+   luôn đứng thẳng, chữ dễ đọc. */
+.orbit {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 0;
+  height: 0;
+  pointer-events: none;            /* không che mặt trời; chỉ .planet nhận chuột */
+  animation: orbitSpin 90s linear infinite;
+  will-change: transform;
+}
+@keyframes orbitSpin { to { transform: rotate(360deg); } }
+
+.planet-slot {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 0;
+  height: 0;
+  transform: rotate(var(--a)) translateX(calc(var(--R) * var(--spread)));
+}
+
+/* Góc xuất phát + màu riêng của từng hành tinh */
+.planet-slot:nth-child(1) { --a: -90deg; --c:#22d3ee; --c2:#0b6f8a; --glow:rgba(34,211,238,.55); }
+.planet-slot:nth-child(2) { --a: -18deg; --c:#4d9bff; --c2:#0b3f9a; --glow:rgba(77,155,255,.55); }
+.planet-slot:nth-child(3) { --a:  54deg; --c:#fbbf24; --c2:#a15c07; --glow:rgba(251,191,36,.50); }
+.planet-slot:nth-child(4) { --a: 126deg; --c:#fb7185; --c2:#9f1f3c; --glow:rgba(251,113,133,.50); }
+.planet-slot:nth-child(5) { --a: 198deg; --c:#a78bfa; --c2:#4c2a9e; --glow:rgba(167,139,250,.55); }
+
+/* a.planet — thẻ <a> có thể click */
+.planet {
+  position: absolute;
+  left: calc(var(--p) / -2);
+  top:  calc(var(--p) / -2);
+  width: var(--p);
+  height: var(--p);
+  display: block;
+  border-radius: 50%;
+  pointer-events: auto;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+  transform: rotate(calc(var(--a) * -1));
+  animation: planetUpright 90s linear infinite;
+}
+@keyframes planetUpright {
+  from { transform: rotate(calc(var(--a) * -1)); }
+  to   { transform: rotate(calc(var(--a) * -1 - 360deg)); }
+}
+
+.planet-body {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 26%,
+    rgba(255,255,255,.8), var(--c) 36%, var(--c2) 80%, #04101f 120%);
+  box-shadow: inset -8px -10px 22px rgba(0,0,0,.35), 0 0 24px var(--glow);
+  transition: transform .4s var(--ease), box-shadow .4s;
+}
+.planet-body::before {         /* vòng "ping" khi hover/focus */
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid var(--c);
+  opacity: 0;
+  pointer-events: none;
+}
+.planet-icon {                 /* đĩa sáng để icon cũ (vẽ cho nền sáng) vẫn rõ */
+  width: 60%;
+  height: 60%;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: rgba(255,255,255,.95);
+  box-shadow: 0 2px 10px rgba(0,0,0,.25);
+}
+.planet-icon img {
+  width: 68%;
+  height: 68%;
+  object-fit: contain;
+}
+.planet-num {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  min-width: 26px;
+  height: 26px;
+  padding: 0 5px;
+  border-radius: 99px;
+  background: #061426;
+  border: 1px solid var(--c);
+  color: #fff;
+  font: 700 10px/24px "Space Grotesk", sans-serif;
+  letter-spacing: .04em;
+  text-align: center;
+}
+
+/* Nhãn tên tiêu chí (luôn hiện nhỏ; hover -> to, sáng, có "KHÁM PHÁ") */
+.planet-label {
+  position: absolute;
+  left: 50%;
+  top: calc(100% + 10px);
+  transform: translateX(-50%);
+  display: grid;
+  justify-items: center;
+  min-width: max-content;
+  padding: 7px 13px;
+  border-radius: 16px;
+  background: rgba(6,20,38,.88);
+  border: 1px solid var(--c);
+  color: #fff;
+  text-align: center;
+  transition: transform .4s var(--ease), background .3s, box-shadow .3s;
+}
+.planet-label strong {
+  font: 700 10px/1.2 "Space Grotesk", sans-serif;
+  letter-spacing: .1em;
+  white-space: nowrap;
+}
+.planet-label em {
+  max-height: 0;
+  margin-top: 0;
+  overflow: hidden;
+  opacity: 0;
+  font: 700 9px/1.7 "Space Grotesk", sans-serif;   /* 1.7 để dấu của chữ Á không bị cắt */
+  font-style: normal;
+  letter-spacing: .12em;
+  color: #fff;
+  white-space: nowrap;
+  transition: max-height .3s, margin-top .3s, opacity .3s;
+}
+/* Mô tả ngắn: ẩn trực quan trên desktop (screen reader vẫn đọc), hiện trên mobile */
+.planet-desc {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* ---- DỪNG QUỸ ĐẠO: hover mặt trời / hover hành tinh / focus bàn phím ---- */
+.sun:focus-visible ~ .orbit,
+.sun:focus-visible ~ .orbit .planet,
+.orbit:focus-within,
+.orbit:focus-within .planet {
+  animation-play-state: paused;
+}
+@media (hover: hover) and (pointer: fine) {
+  .sun:hover ~ .orbit,
+  .sun:hover ~ .orbit .planet,
+  .orbit:hover,
+  .orbit:hover .planet {
+    animation-play-state: paused;
+  }
+  .sun:hover .sun-body {
+    transform: scale(1.07);
+    box-shadow:
+      0 0 50px rgba(34,211,238,.7),
+      0 0 130px rgba(22,119,255,.55),
+      inset 0 0 40px rgba(34,211,238,.4);
+  }
+  .sun:hover .sun-body img { transform: scale(1.08); }
+  .sun:hover .sun-glow     { animation-duration: 2s; }
+}
+
+/* ---- HOVER / FOCUS HÀNH TINH: phóng to + viền sáng lóa + hiện rõ tên ---- */
+.planet-slot:focus-within { z-index: 20; }
+.planet:focus-visible .planet-body {
+  transform: scale(1.22);
+  box-shadow:
+    inset -8px -10px 22px rgba(0,0,0,.3),
+    0 0 0 3px rgba(255,255,255,.75),
+    0 0 46px 8px var(--glow),
+    0 0 120px 24px var(--glow);
+}
+.planet:focus-visible .planet-body::before { animation: planetPing 1.2s ease-out infinite; }
+.planet:focus-visible .planet-label {
+  background: linear-gradient(120deg, var(--c2), #0a1d35);
+  box-shadow: 0 0 28px var(--glow);
+  transform: translateX(-50%) translateY(calc(var(--p) * .12 + 2px)) scale(1.12);
+}
+.planet:focus-visible .planet-label em { max-height: 20px; margin-top: 3px; opacity: 1; }
+
+@media (hover: hover) and (pointer: fine) {
+  .planet-slot:hover { z-index: 20; }   /* hành tinh đang hover nằm trên cùng */
+
+  .planet:hover .planet-body {
+    transform: scale(1.22);
+    box-shadow:
+      inset -8px -10px 22px rgba(0,0,0,.3),
+      0 0 0 3px rgba(255,255,255,.75),
+      0 0 46px 8px var(--glow),
+      0 0 120px 24px var(--glow);
+  }
+  .planet:hover .planet-body::before { animation: planetPing 1.2s ease-out infinite; }
+  .planet:hover .planet-label {
+    background: linear-gradient(120deg, var(--c2), #0a1d35);
+    box-shadow: 0 0 28px var(--glow);
+    transform: translateX(-50%) translateY(calc(var(--p) * .12 + 2px)) scale(1.12);
+  }
+  .planet:hover .planet-label em { max-height: 20px; margin-top: 3px; opacity: 1; }
+}
+@keyframes planetPing {
+  0%   { transform: scale(1);   opacity: .85; }
+  100% { transform: scale(1.7); opacity: 0; }
+}
+
+/* ---- Chân hub: gợi ý thao tác ---- */
+.hub-foot {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 10px 22px;
+  padding: 0 16px;
+  color: #a9bdd4;
+  font-size: 12px;
+  text-align: center;
+}
+.hub-hint { display: inline-flex; align-items: center; gap: 9px; }
+@media (hover: none)  { .hint-hover { display: none; } }
+@media (hover: hover) { .hint-touch { display: none; } }
+.hub-more {
+  padding: 10px 16px;
+  border: 1px solid rgba(34,211,238,.3);
+  border-radius: 100px;
+  background: rgba(22,119,255,.12);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .08em;
+  transition: .3s var(--ease);
+}
+.hub-more:hover { border-color: rgba(34,211,238,.6); transform: translateY(-2px); }
+.hub-more span { color: var(--cyan); margin-left: 4px; }
+
+/* ---- TABLET / MOBILE (≤900px): hệ mặt trời -> LƯỚI THẺ DỄ CHẠM ----
+   Không còn quỹ đạo, không còn animation xoay: mặt trời ở trên,
+   5 tiêu chí xếp thành lưới 2 cột (1 cột trên điện thoại nhỏ). */
+@media (max-width: 900px) {
+  .hub {
+    justify-content: flex-start;
+    gap: 22px;
+    padding: 104px 0 64px;
+  }
+  .solar-system {
+    --sun: 132px;
+    width: min(680px, calc(100% - 32px));
+    height: auto;
+  }
+  .solar-core {
+    position: static;
+    width: auto;
+    height: auto;
+    display: grid;
+    justify-items: center;
+    gap: 36px;
+    transition: none;
+  }
+  .sys-ring { display: none; }
+  .sun { position: relative; left: auto; top: auto; margin-top: 18px; }
+
+  .orbit {
+    position: static;
+    width: 100%;
+    height: auto;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    animation: none;
+    will-change: auto;
+    pointer-events: auto;
+  }
+  .planet-slot {
+    position: static;
+    width: auto;
+    height: auto;
+    transform: none;
+  }
+  .planet-slot:nth-child(5) { grid-column: 1 / -1; }   /* thẻ lẻ trải full hàng */
+
+  .planet {
+    --pm: 64px;
+    position: relative;
+    left: auto;
+    top: auto;
+    width: auto;
+    height: auto;
+    min-height: 92px;
+    display: grid;
+    grid-template-columns: var(--pm) minmax(0, 1fr) auto;
+    grid-template-areas:
+      "body label arrow"
+      "body desc  arrow";
+    align-items: center;
+    column-gap: 14px;
+    row-gap: 3px;
+    padding: 14px 16px;
+    border-radius: 20px;
+    background: linear-gradient(150deg, rgba(18,43,72,.82), rgba(7,24,45,.86));
+    border: 1px solid rgba(114,166,224,.22);
+    box-shadow: inset 4px 0 0 var(--c);
+    transform: none;
+    animation: none;
+    transition: transform .25s var(--ease), border-color .25s;
+  }
+  .planet:active { transform: scale(.98); border-color: var(--c); }
+  .planet:focus-visible { outline: 2px solid var(--c); outline-offset: 2px; }
+  .planet::after {
+    content: "→";
+    grid-area: arrow;
+    color: var(--c);
+    font-size: 20px;
+    padding-right: 2px;
+  }
+  .planet-label { grid-area: label; align-self: end; }
+  .planet-desc  { grid-area: desc;  align-self: start; }
+  .planet-body {
+    grid-area: body;
+    position: relative;
+    inset: auto;
+    width: var(--pm);
+    height: var(--pm);
+  }
+  .planet-num { min-width: 22px; height: 22px; font-size: 9px; line-height: 20px; }
+
+  /* Nhãn: chuyển từ "chip nổi" thành khối chữ nằm trong thẻ, luôn hiện rõ */
+  .planet-label,
+  .planet:focus-visible .planet-label {
+    position: static;
+    transform: none;
+    min-width: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: none;
+    box-shadow: none;
+    justify-items: start;
+    text-align: left;
+    gap: 4px;
+  }
+  .planet-label strong { font-size: 14px; letter-spacing: .06em; white-space: normal; }
+  .planet-label em     { display: none; }
+  .planet-desc {
+    position: static;
+    width: auto;
+    height: auto;
+    overflow: visible;
+    clip: auto;
+    white-space: normal;
+    font-size: 12.5px;
+    line-height: 1.6;
+    color: #c3d3e6;                     /* tương phản cao trên nền tối */
+  }
+  .planet:focus-visible .planet-body { transform: none; box-shadow: inset -8px -10px 22px rgba(0,0,0,.35), 0 0 24px var(--glow); }
+}
+@media (max-width: 560px) {
+  .orbit { grid-template-columns: 1fr; }
+  .planet-slot:nth-child(5) { grid-column: auto; }
+  .hub-title { font-size: clamp(32px, 10vw, 44px); }
+}
+
+/* Người dùng bật "giảm chuyển động": đứng yên toàn bộ */
+@media (prefers-reduced-motion: reduce) {
+  .hub-stars, .hub-stars::after,
+  .sun-glow, .sun-corona, .sun-body::after,
+  .sys-ring, .orbit, .planet,
+  .planet-body::before {
+    animation: none !important;
+  }
+  .solar-core { transition: none; }
+}
+
+
+/* =====================================================================
+   C. TEMPLATE TRANG TIÊU CHÍ — "GIẢI ĐÁP VÌ SAO"
+   Màu theo từng tiêu chí được khai báo bằng biến CSS trên <body>
+   (--c, --c2, --glow) — xem tieuchi.html.
+   ===================================================================== */
+
+.crit-page main {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background: #061426;
+}
+.crit-space {                    /* nền vũ trụ cho cả trang */
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 50% 30% at 82% 6%,  var(--glow), transparent 70%),
+    radial-gradient(ellipse 40% 28% at 6% 42%,  rgba(124,58,237,.14), transparent 70%),
+    linear-gradient(#061426, #07182d 55%, #061426);
+}
+
+/* ---- Hero của trang ---- */
+.crit-hero { padding: 140px 0 28px; }
+.crit-hero-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, .8fr);
+  gap: 48px;
+  align-items: center;
+}
+.crit-title {
+  margin: 22px 0 18px;
+  font: 700 clamp(46px, 7vw, 92px)/.92 "Space Grotesk", sans-serif;
+  letter-spacing: -.06em;
+}
+.crit-title span {
+  background: linear-gradient(100deg, #fff 0%, var(--c) 55%, var(--c2) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.crit-lead {
+  max-width: 560px;
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.8;
+  color: #c9d8ea;
+}
+
+/* Hành tinh lớn minh hoạ tiêu chí hiện tại */
+.crit-planet {
+  position: relative;
+  width: min(300px, 62vw);
+  aspect-ratio: 1;
+  margin: 0 auto;
+}
+.crit-planet-body {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 26%,
+    rgba(255,255,255,.8), var(--c) 36%, var(--c2) 80%, #04101f 120%);
+  box-shadow:
+    inset -18px -22px 50px rgba(0,0,0,.4),
+    0 0 60px var(--glow),
+    0 0 140px var(--glow);
+}
+.crit-planet-icon {
+  width: 56%;
+  height: 56%;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: rgba(255,255,255,.95);
+  box-shadow: 0 6px 24px rgba(0,0,0,.3);
+}
+.crit-planet-icon img { width: 68%; height: 68%; object-fit: contain; }
+.crit-planet::before,
+.crit-planet::after {            /* 2 vành quỹ đạo xoay chậm */
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+}
+.crit-planet::before {
+  inset: -14%;
+  border: 1px dashed rgba(255,255,255,.22);
+  animation: ringSpin 60s linear infinite;
+}
+.crit-planet::after {
+  inset: -30%;
+  border: 1px solid rgba(255,255,255,.10);
+  animation: ringSpin 110s linear infinite reverse;
+}
+
+/* Thanh chuyển nhanh giữa 5 tiêu chí */
+.crit-switch { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 30px; }
+.crit-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 10px 15px;
+  border: 1px solid rgba(160,195,235,.24);
+  border-radius: 99px;
+  background: rgba(10,29,53,.6);
+  color: #d5e2f2;
+  font-size: 13px;
+  font-weight: 600;
+  transition: border-color .25s, background .25s, transform .25s var(--ease);
+}
+.crit-chip i {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--ci);
+  box-shadow: 0 0 10px var(--ci);
+}
+.crit-chip:hover { border-color: var(--ci); transform: translateY(-2px); }
+.crit-chip[aria-current="page"] {
+  border-color: var(--ci);
+  background: rgba(255,255,255,.09);
+  color: #fff;
+}
+.crit-chip:focus-visible,
+.crit-pager a:focus-visible,
+.why-list .faq-item button:focus-visible {
+  outline: 2px solid var(--cyan);
+  outline-offset: 3px;
+}
+
+/* ---- Danh sách "VÌ SAO" (accordion dạng card kính mờ) ----
+   Tái dùng đúng markup .faq-item / button / .faq-answer để script.js
+   (initFAQ) chạy luôn, không cần JS mới. */
+.why-section { padding: 36px 0 110px; }
+.why-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  justify-content: space-between;
+  gap: 10px 24px;
+  max-width: 880px;
+  margin-bottom: 24px;
+}
+.why-head h2 {
+  margin: 0;
+  font: 700 clamp(26px, 3.4vw, 40px)/1.1 "Space Grotesk", sans-serif;
+  letter-spacing: -.03em;
+}
+.why-head p { margin: 0; font-size: 14px; color: #b8cadf; }
+
+.why-list { display: grid; gap: 14px; max-width: 880px; }
+.why-list .faq-item {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(160,195,235,.24);
+  border-radius: 22px;
+  background: linear-gradient(150deg, rgba(18,43,72,.80), rgba(8,26,48,.88));
+  -webkit-backdrop-filter: blur(14px);
+          backdrop-filter: blur(14px);
+  box-shadow: 0 18px 60px rgba(0,0,0,.28);
+  transition: border-color .3s, box-shadow .3s;
+}
+.why-list .faq-item::before {    /* vạch màu tiêu chí khi mở */
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: var(--c);
+  box-shadow: 0 0 18px var(--glow);
+  opacity: 0;
+  transition: opacity .3s;
+}
+.why-list .faq-item:hover { border-color: rgba(160,195,235,.42); }
+.why-list .faq-item.open  { border-color: var(--c); box-shadow: 0 18px 60px rgba(0,0,0,.32), 0 0 40px -12px var(--glow); }
+.why-list .faq-item.open::before { opacity: 1; }
+
+.why-list .faq-item button {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 16px;
+  padding: 22px 24px;
+  font-size: clamp(16px, 1.9vw, 19px);
+  font-weight: 600;
+  line-height: 1.45;
+  color: #fff;
+}
+.why-mark {                      /* dấu "?" */
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  background: rgba(255,255,255,.07);
+  border: 1px solid rgba(160,195,235,.28);
+  color: var(--c);
+  font: 700 18px "Space Grotesk", sans-serif;
+}
+.why-list .faq-item button i {   /* dấu + -> xoay thành × khi mở */
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  border: 1px solid rgba(160,195,235,.32);
+  font-size: 22px;
+  line-height: 1;
+  color: var(--c);
+  transition: transform .35s var(--ease), background .3s, color .3s, border-color .3s;
+}
+.why-list .faq-item.open button i {
+  background: var(--c);
+  border-color: var(--c);
+  color: #061426;
+}
+
+/* Câu trả lời: chữ sáng, cỡ 16px, nền tối => tương phản cao */
+.why-list .faq-answer {
+  visibility: hidden;                          /* nội dung đang đóng không bị tab/đọc nhầm */
+  transition: height .4s var(--ease), visibility 0s .4s;
+}
+.why-list .faq-item.open .faq-answer {
+  visibility: visible;
+  transition: height .4s var(--ease), visibility 0s;
+}
+.why-answer { padding: 2px 24px 26px 76px; }  /* 76 = lề trái chữ câu hỏi */
+.why-list .faq-answer p {
+  max-width: 68ch;
+  margin: 0 0 14px;
+  padding: 0;
+  font-size: 16px;
+  line-height: 1.85;
+  color: #e3ecf8;
+}
+.why-list .faq-answer p:last-child { margin-bottom: 0; }
+
+/* ---- Điều hướng hành tinh trước / sau ---- */
+.crit-pager {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  max-width: 880px;
+  margin-top: 44px;
+}
+.crit-pager a {
+  display: grid;
+  gap: 6px;
+  padding: 20px 22px;
+  border: 1px solid rgba(160,195,235,.24);
+  border-radius: 20px;
+  background: rgba(10,29,53,.62);
+  transition: border-color .25s, transform .25s var(--ease), background .25s;
+}
+.crit-pager a:hover { border-color: var(--pc); transform: translateY(-3px); background: rgba(16,40,70,.8); }
+.crit-pager small { font: 700 10px "Space Grotesk", sans-serif; letter-spacing: .14em; color: #a9bdd4; }
+.crit-pager strong { font: 700 18px "Space Grotesk", sans-serif; }
+.crit-pager .is-next { text-align: right; }
+.crit-home { display: flex; justify-content: center; max-width: 880px; margin-top: 26px; }
+
+@media (max-width: 900px) {
+  .crit-hero { padding-top: 120px; }
+  .crit-hero-grid { grid-template-columns: 1fr; gap: 34px; }
+  .crit-planet { width: min(210px, 52vw); order: -1; margin: 0 auto 10px; }
+}
+@media (max-width: 600px) {
+  .why-list .faq-item button { padding: 18px 16px; gap: 12px; }
+  .why-answer { padding: 0 18px 22px 18px; }
+  .why-mark, .why-list .faq-item button i { width: 32px; height: 32px; }
+  .crit-pager { grid-template-columns: 1fr; }
+  .crit-pager .is-next { text-align: left; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .crit-planet::before, .crit-planet::after { animation: none; }
+  .why-list .faq-answer { transition: none; }
+}
+
+
+/* =====================================================================
+   D. HERO TRANG CHỦ (độc lập, không phụ thuộc .hub/.shell)
+   ===================================================================== */
+.hero5 { position: relative; isolation: isolate; overflow: hidden; overflow: clip; display: grid; align-items: center;
+  min-height: 100vh; min-height: 100svh; padding: 110px 0 80px; color: #fff; background: #061426; }
+.hero5-bg { position: absolute; inset: 0; z-index: -1; overflow: hidden; }
+.h5-glow { position: absolute; border-radius: 50%; filter: blur(90px); opacity: .55; }
+.h5-glow.g1 { width: 46vw; height: 46vw; max-width: 640px; max-height: 640px; right: -6%; top: 8%; background: #1677ff; }
+.h5-glow.g2 { width: 34vw; height: 34vw; max-width: 460px; max-height: 460px; left: -8%; bottom: -10%; background: #7c3aed; opacity: .35; }
+.h5-grid { position: absolute; inset: 0; background-image: linear-gradient(rgba(255,255,255,.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.05) 1px, transparent 1px);
+  background-size: 56px 56px; -webkit-mask-image: radial-gradient(ellipse 70% 70% at 60% 45%, #000, transparent 75%); mask-image: radial-gradient(ellipse 70% 70% at 60% 45%, #000, transparent 75%); }
+.hero5-inner { width: min(1200px, calc(100% - 40px)); margin: 0 auto; display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr); align-items: center; gap: clamp(24px, 5vw, 72px); }
+.hero5-copy { display: grid; gap: 22px; justify-items: start; }
+.h5-eyebrow { display: inline-flex; align-items: center; gap: 10px; padding: 8px 16px; border: 1px solid rgba(34,211,238,.35); border-radius: 999px; background: rgba(34,211,238,.08);
+  font: 600 12px/1 "Space Grotesk", sans-serif; letter-spacing: .14em; color: #9fe9f5; }
+.h5-eyebrow i { width: 8px; height: 8px; border-radius: 50%; background: #22d3ee; box-shadow: 0 0 12px #22d3ee; }
+.hero5 h1 { margin: 0; font: 700 clamp(44px, 7vw, 92px)/.98 "Space Grotesk", sans-serif; letter-spacing: -.02em; }
+.hero5 h1 em { font-style: normal; background: linear-gradient(100deg, #22d3ee, #4d9bff 55%, #a278ff); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.hero5 h1 span { display: block; margin-top: 16px; font: 500 clamp(16px, 1.8vw, 22px)/1.3 "Be Vietnam Pro", sans-serif; letter-spacing: 0; color: #b8c7e0; }
+.hero5-copy > p { margin: 0; max-width: 540px; font-size: clamp(15px, 1.4vw, 18px); line-height: 1.7; color: #c5d2e8; }
+.h5-actions { display: flex; flex-wrap: wrap; gap: 12px; }
+.h5-chips { list-style: none; margin: 8px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 10px; }
+.h5-chips li { display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px; border-radius: 999px; border: 1px solid rgba(255,255,255,.14); background: rgba(255,255,255,.05); font-size: 13px; font-weight: 600; backdrop-filter: blur(6px); }
+.h5-chips b { font: 700 11px "Space Grotesk", sans-serif; color: #22d3ee; }
+.hero5-visual { position: relative; display: grid; place-items: center; aspect-ratio: 1; width: min(100%, 520px); justify-self: center; }
+.hero5-visual img { position: relative; width: 66%; height: auto; filter: drop-shadow(0 0 50px rgba(34,211,238,.4)); animation: h5-float 6s ease-in-out infinite; }
+.h5-ring { position: absolute; border-radius: 50%; border: 1px dashed rgba(120,190,255,.35); }
+.h5-ring.r1 { inset: 4%; animation: h5-spin 60s linear infinite; }
+.h5-ring.r2 { inset: 14%; border-style: solid; border-color: rgba(34,211,238,.2); animation: h5-spin 40s linear infinite reverse; }
+.h5-ring.r3 { inset: -4%; border-color: rgba(162,120,255,.25); animation: h5-spin 90s linear infinite; }
+.h5-ring.r1::after, .h5-ring.r3::after { content: ""; position: absolute; top: 6%; left: 50%; width: 10px; height: 10px; border-radius: 50%; background: #22d3ee; box-shadow: 0 0 16px #22d3ee; }
+.h5-scroll { position: absolute; left: 50%; bottom: 24px; width: 44px; height: 44px; margin-left: -22px; display: grid; place-items: center; border: 1px solid rgba(255,255,255,.25); border-radius: 50%; }
+.h5-scroll span { width: 8px; height: 8px; border-right: 2px solid #22d3ee; border-bottom: 2px solid #22d3ee; transform: rotate(45deg); animation: h5-bob 1.6s ease-in-out infinite; }
+@keyframes h5-spin { to { transform: rotate(360deg); } }
+@keyframes h5-float { 50% { transform: translateY(-12px); } }
+@keyframes h5-bob { 50% { transform: translateY(5px) rotate(45deg); } }
+@media (max-width: 900px) {
+  .hero5 { padding: 96px 0 84px; }
+  .hero5-inner { grid-template-columns: minmax(0, 1fr); text-align: center; }
+  .hero5-copy { justify-items: center; }
+  .h5-actions, .h5-chips { justify-content: center; }
+  .hero5-visual { order: -1; width: min(60vw, 260px); }
+}
+@media (max-width: 560px) { .h5-actions .button { width: 100%; } }
+@media (prefers-reduced-motion: reduce) { .hero5-visual img, .h5-ring, .h5-scroll span { animation: none; } }
+
+/* =====================================================================
+   E. TRANG BAN CHỦ NHIỆM — HÀNH LANG KỶ NIỆM
+   ===================================================================== */
+.bcn-page { background: #fbeea0; color: #4a3015; }
+.bcn-page .site-header { background: rgba(6,20,38,.88); }
+.bcn-intro { padding: 128px 0 24px; text-align: center; background: linear-gradient(#fdf3b0, #fbeea0); }
+.bcn-intro .shell { display: grid; gap: 12px; justify-items: center; }
+.bcn-intro .section-kicker { color: #8a5a1e; }
+.bcn-intro h1 { margin: 0; font: 700 clamp(30px, 5vw, 56px)/1.05 "Space Grotesk", sans-serif; color: #5a3a12; }
+.bcn-intro h1 span { color: #c0661a; }
+.bcn-intro p { max-width: 560px; margin: 0; }
+.bcn-hall { overflow-x: clip; }
+/* Mỗi nhiệm kỳ = 1 "căn phòng" dùng ảnh nền tường + sàn gỗ; thêm nhiệm kỳ thì hành lang dài ra liền mạch */
+.bcn-room {
+  position: relative; display: flex; align-items: center; justify-content: center;
+  min-height: max(100svh, 640px); padding: 40px 16px 24vh;
+  background: #fdf3b0 url("assets/hanh-lang.png") center bottom / cover no-repeat;
+  margin-top: -1px;
+}
+.shelf {
+  position: relative; display: grid; gap: 12px; justify-items: center;
+  width: min(900px, 94vw); padding: 0; border: 0; background: none; color: inherit; cursor: pointer;
+  min-height: 44px; transition: transform .35s ease, filter .35s ease;
+}
+.shelf:hover, .shelf:focus-visible, .shelf.is-active { transform: scale(1.04); filter: drop-shadow(0 18px 24px rgba(90,50,10,.3)); }
+.shelf:focus-visible { outline: 3px solid #c0661a; outline-offset: 10px; }
+.shelf-plate { padding: 8px 20px; border-radius: 999px; background: #5a3a12; color: #fff3c4; font: 700 15px "Space Grotesk", sans-serif; letter-spacing: .06em; }
+.shelf-row { width: 100%; display: flex; align-items: flex-end; justify-content: space-between; gap: clamp(10px, 3vw, 36px); padding: 0 clamp(8px, 3vw, 30px); }
+.shelf-letter { display: grid; justify-items: center; gap: 4px; width: clamp(64px, 12vw, 104px); transform: rotate(-6deg); font-size: 12px; font-weight: 700; color: #7a4b1e; }
+.shelf-letter svg { width: 100%; height: auto; }
+.shelf-frame { position: relative; flex: 1 1 auto; max-width: 400px; aspect-ratio: 4 / 3; border: clamp(6px, 1.2vw, 12px) solid #7a4b1e; background: linear-gradient(135deg, #fff, #f1dfb2); box-shadow: inset 0 0 0 2px rgba(0,0,0,.15), 0 8px 18px rgba(60,30,0,.25); display: grid; place-items: center; overflow: hidden; }
+.shelf-frame img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.shelf-frame em { font: 700 13px "Space Grotesk", sans-serif; color: #b08a4a; font-style: normal; letter-spacing: .1em; }
+.shelf-mascot { width: clamp(72px, 14vw, 120px); aspect-ratio: 1; display: grid; place-items: center; }
+.shelf-mascot img { width: 100%; height: 100%; object-fit: contain; }
+.shelf-mascot.no-img { border-radius: 50%; background: radial-gradient(circle, #ffe38a, #f5b43c); }
+.shelf-mascot.no-img::after { content: "5"; font: 700 40px "Space Grotesk", sans-serif; color: #7a4b1e; }
+.shelf-board { width: 100%; height: 18px; border-radius: 3px; background: linear-gradient(#c58340, #8a5524); box-shadow: 0 16px 18px -8px rgba(60,30,0,.5); }
+.bcn-overlay { position: fixed; inset: 0; z-index: 90; background: rgba(20,10,0,.5); opacity: 0; transition: opacity .3s; }
+.bcn-overlay.show { opacity: 1; }
+.bcn-panel {
+  position: fixed; top: 0; right: 0; bottom: 0; z-index: 100; width: min(520px, 100vw); overflow-y: auto;
+  padding: 72px 28px 40px; background: #fffaf0; color: #4a3015; box-shadow: -20px 0 50px rgba(0,0,0,.35);
+  transform: translateX(105%); visibility: hidden; transition: transform .38s cubic-bezier(.22,.8,.3,1), visibility 0s .38s;
+}
+.bcn-panel.open { transform: none; visibility: visible; transition-delay: 0s; }
+.bcn-close { position: absolute; top: 14px; right: 14px; width: 44px; height: 44px; border: 0; border-radius: 50%; background: #5a3a12; color: #fff; font-size: 26px; cursor: pointer; }
+.bcn-period { margin: 0; color: #c0661a; font-weight: 700; font-size: 13px; letter-spacing: .12em; text-transform: uppercase; }
+.bcn-panel h2 { margin: 4px 0 16px; font: 700 28px/1.1 "Space Grotesk", sans-serif; }
+.bcn-panel h3 { margin: 26px 0 10px; font: 700 15px "Space Grotesk", sans-serif; letter-spacing: .06em; text-transform: uppercase; color: #8a5a1e; }
+.bcn-photo { margin: 0; aspect-ratio: 4 / 3; border-radius: 12px; overflow: hidden; background: #f1dfb2; }
+.bcn-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.bcn-members { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.bcn-members li { display: flex; justify-content: space-between; gap: 12px; padding: 10px 14px; border-radius: 10px; background: #f8ecc8; }
+.bcn-letter { padding: 18px; border-left: 4px solid #c0661a; background: #fff; border-radius: 0 10px 10px 0; line-height: 1.7; }
+.bcn-letter p { margin: 0 0 10px; }
+body.bcn-lock { overflow: hidden; }
+@media (max-width: 560px) {
+  .bcn-room { min-height: 560px; padding-bottom: 20vh; }
+  .shelf-row { padding: 0; gap: 8px; }
+  .bcn-panel { padding: 68px 18px 32px; }
+}
+@media (prefers-reduced-motion: reduce) { .shelf, .bcn-panel, .bcn-overlay { transition: none; } }
+
+/* =====================================================================
+   F. TOUCH TARGET + CHỐNG TRÀN NGANG
+   ===================================================================== */
+.button, .nav-cta, .menu-toggle, .back-top, .mobile-menu a, .faq-item > button, .hub-more { min-height: 44px; }
+.menu-toggle, .back-top { min-width: 44px; }
+.button-ghost { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 0 22px; border: 1px solid rgba(255,255,255,.35); border-radius: 999px; color: #fff; text-decoration: none; font-weight: 700; }
+.section, .faq-section, .social-section, .final-cta { position: relative; overflow-x: clip; }
+
+
+/* =====================================================================
+   G. BCN: MỖI THÀNH VIÊN = 1 KHUNG ẢNH VUÔNG (ghi đè phần E)
+   ===================================================================== */
+.shelf-frames { flex: 1 1 auto; min-width: 0; display: flex; align-items: flex-end; justify-content: center; gap: clamp(8px, 1.6vw, 20px); }
+.shelf-frames .bcn-sq { flex: 1 1 0; max-width: 130px; border: clamp(5px, .9vw, 9px) solid #7a4b1e; box-shadow: inset 0 0 0 2px rgba(0,0,0,.15), 0 8px 16px rgba(60,30,0,.25); }
+.bcn-sq { position: relative; display: grid; place-items: center; aspect-ratio: 1; overflow: hidden; background: linear-gradient(135deg, #fff, #f1dfb2); }
+.bcn-sq img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.bcn-sq em { font: 700 clamp(18px, 3vw, 34px) "Space Grotesk", sans-serif; font-style: normal; color: #b08a4a; }
+.bcn-gallery { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.bcn-person { margin: 0; display: grid; gap: 8px; }
+.bcn-person .bcn-sq { border-radius: 12px; }
+.bcn-person figcaption { display: grid; gap: 2px; font-size: 14px; }
+.bcn-person figcaption span { color: #8a5a1e; font-size: 12px; }
+@media (max-width: 560px) { .shelf-row { flex-wrap: wrap; justify-content: center; } .shelf-frames { order: 3; flex-basis: 100%; } }
