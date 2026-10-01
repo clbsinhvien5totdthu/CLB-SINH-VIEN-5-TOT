@@ -24,6 +24,7 @@ function qsa(selector, root = document) { return [...root.querySelectorAll(selec
  
 function showToast(message) {
   const toast = qs(".toast");
+  if (!toast) return;
   toast.textContent = message;
   toast.classList.add("show");
   clearTimeout(toastTimer);
@@ -35,12 +36,14 @@ function initNavbar() {
   const menuBtn = qs(".menu-toggle");
   const menu = qs(".mobile-menu");
   const closeMenu = () => {
+    if (!menu || !menuBtn) return;
     menu.classList.remove("open");
     menu.setAttribute("aria-hidden", "true");
     menuBtn.classList.remove("open");
     menuBtn.setAttribute("aria-expanded", "false");
   };
-  menuBtn.addEventListener("click", () => {
+  menuBtn?.addEventListener("click", () => {
+    if (!menu) return;
     const open = !menu.classList.contains("open");
     menu.classList.toggle("open", open);
     menu.setAttribute("aria-hidden", String(!open));
@@ -50,7 +53,7 @@ function initNavbar() {
   qsa(".mobile-menu a").forEach(link => link.addEventListener("click", closeMenu));
   // Đăng ký với vòng scroll gộp chung (xem initScrollLoop) thay vì tự thêm
   // listener riêng — tránh nhiều listener cùng đọc/ghi layout mỗi lần cuộn.
-  onScroll(() => header.classList.toggle("scrolled", scrollY > 20));
+  onScroll(() => header?.classList.toggle("scrolled", scrollY > 20));
 }
 
 /**
@@ -109,25 +112,40 @@ function initScrollReveal() {
 }
  
 function initFAQ() {
-  qsa(".faq-item").forEach(item => {
-    const button = qs("button", item);
-    const answer = qs(".faq-answer", item);
-    button.addEventListener("click", () => {
-      const wasOpen = item.classList.contains("open");
-      qsa(".faq-item.open").forEach(openItem => {
-        openItem.classList.remove("open");
-        qs("button", openItem).setAttribute("aria-expanded", "false");
-        qs(".faq-answer", openItem).style.height = "0px";
-      });
-      if (!wasOpen) {
-        item.classList.add("open");
-        button.setAttribute("aria-expanded", "true");
-        answer.style.height = `${answer.scrollHeight}px`;
-      }
+  const items = qsa(".faq-item");
+  const setters = new Map();
+  items.forEach((item, i) => {
+    const btn = qs("button", item), ans = qs(".faq-answer", item);
+    if (!btn || !ans) return;
+    ans.id = ans.id || `faq-a-${i}`;
+    btn.id = btn.id || `faq-q-${i}`;
+    btn.setAttribute("aria-controls", ans.id);
+    ans.setAttribute("role", "region");
+    ans.setAttribute("aria-labelledby", btn.id);
+    const set = open => {
+      item.classList.toggle("open", open);
+      btn.setAttribute("aria-expanded", String(open));
+      ans.style.height = open ? `${ans.scrollHeight}px` : "0px";
+    };
+    setters.set(item, set);
+    btn.addEventListener("click", () => {
+      const was = item.classList.contains("open");
+      setters.forEach((fn, other) => { if (other !== item) fn(false); });
+      set(!was);
+    });
+    btn.addEventListener("keydown", e => {
+      const list = qsa("button", item.closest(".faq-list") || document);
+      const at = list.indexOf(btn);
+      const to = { ArrowDown: at + 1, ArrowUp: at - 1, Home: 0, End: list.length - 1 }[e.key];
+      if (to === undefined) return;
+      e.preventDefault();
+      list[(to + list.length) % list.length].focus();
     });
   });
+  window.addEventListener("resize", () =>
+    qsa(".faq-item.open .faq-answer").forEach(a => { a.style.height = `${a.scrollHeight}px`; }), { passive: true });
 }
- 
+
 function initQRButtons() {
   qsa(".qr-card").forEach(card => {
     const key = card.dataset.qr;
@@ -517,17 +535,14 @@ function initBackToTop() {
 }
  
 function initActiveNavigation() {
-  const links = qsa(".nav-links a");
-  const sections = links.map(link => qs(link.getAttribute("href"))).filter(Boolean);
-  const observer = new IntersectionObserver(entries => {
-    entries.forEach(entry => {
-      if (!entry.isIntersecting) return;
-      links.forEach(link => link.classList.toggle("active", link.getAttribute("href") === `#${entry.target.id}`));
-    });
-  }, {rootMargin:"-35% 0px -55% 0px", threshold:0});
-  sections.forEach(section => observer.observe(section));
+  const page = (location.pathname.split("/").pop() || "index.html").toLowerCase();
+  qsa(".nav-links a, .mobile-menu a:not(.button)").forEach(link => {
+    const on = (link.getAttribute("href") || "").split("#")[0].toLowerCase() === page;
+    link.classList.toggle("active", on);
+    if (on) link.setAttribute("aria-current", "page"); else link.removeAttribute("aria-current");
+  });
 }
- 
+
 function initReducedMotion() {
   document.documentElement.dataset.reducedMotion = reducedMotion ? "true" : "false";
 }
@@ -647,30 +662,148 @@ function initBackgroundMusic() {
  
   updateMusicButton();
 }
+
+/* ---------- BAN CHỦ NHIỆM: dữ liệu (thêm nhiệm kỳ mới = thêm 1 object vào đầu/cuối mảng) ---------- */
+const BCN_TERMS = [
+  { id: "2022-2023", period: "Nhiệm kỳ 2022 – 2023", photo: "assets/bcn-2022-2023.jpg",
+    members: [["Chủ nhiệm", "[Họ và tên]"], ["Phó Chủ nhiệm", "[Họ và tên]"], ["Trưởng ban Truyền thông", "[Họ và tên]"], ["Trưởng ban Sự kiện", "[Họ và tên]"]],
+    letter: ["[Thay bằng nội dung bức thư của Ban chủ nhiệm nhiệm kỳ 2022 – 2023.]", "Mỗi đoạn là một phần tử trong mảng letter."] },
+  { id: "2023-2024", period: "Nhiệm kỳ 2023 – 2024", photo: "assets/bcn-2023-2024.jpg",
+    members: [["Chủ nhiệm", "[Họ và tên]"], ["Phó Chủ nhiệm", "[Họ và tên]"], ["Trưởng ban Truyền thông", "[Họ và tên]"], ["Trưởng ban Sự kiện", "[Họ và tên]"]],
+    letter: ["[Thay bằng nội dung bức thư của Ban chủ nhiệm nhiệm kỳ 2023 – 2024.]"] },
+  { id: "2024-2025", period: "Nhiệm kỳ 2024 – 2025", photo: "assets/bcn-2024-2025.jpg",
+    members: [["Chủ nhiệm", "[Họ và tên]"], ["Phó Chủ nhiệm", "[Họ và tên]"], ["Trưởng ban Truyền thông", "[Họ và tên]"], ["Trưởng ban Sự kiện", "[Họ và tên]"]],
+    letter: ["[Thay bằng nội dung bức thư của Ban chủ nhiệm nhiệm kỳ 2024 – 2025.]"] }
+];
+
+function el(tag, cls, text) {
+  const n = document.createElement(tag);
+  if (cls) n.className = cls;
+  if (text) n.textContent = text;
+  return n;
+}
+
+function initBCN() {
+  const hall = qs("#bcnHall"), panel = qs("#bcnPanel"), overlay = qs("#bcnOverlay");
+  if (!hall || !panel || !overlay) return;
+  const closeBtn = qs(".bcn-close", panel);
+  let lastTrigger = null;
+
+  const envelope = '<svg viewBox="0 0 64 48" aria-hidden="true"><rect x="2" y="6" width="60" height="40" rx="4" fill="#fffaf0" stroke="#a9722f" stroke-width="2"/><path d="M4 9l28 21L60 9" fill="none" stroke="#a9722f" stroke-width="2"/><circle cx="32" cy="30" r="6" fill="#e0503c"/></svg>';
+
+  BCN_TERMS.forEach((t, i) => {
+    const room = el("section", "bcn-room");
+    const shelf = el("button", "shelf");
+    shelf.type = "button";
+    shelf.dataset.index = i;
+    shelf.setAttribute("aria-haspopup", "dialog");
+    shelf.setAttribute("aria-label", `Mở ${t.period}`);
+    const plate = el("span", "shelf-plate", t.period);
+    const row = el("span", "shelf-row");
+    const letter = el("span", "shelf-letter");
+    letter.innerHTML = envelope;
+    letter.appendChild(el("small", "", "Lá thư"));
+    const frame = el("span", "shelf-frame");
+    const img = el("img");
+    img.src = t.photo; img.alt = ""; img.loading = "lazy"; img.decoding = "async";
+    img.addEventListener("error", () => { img.remove(); });
+    frame.append(img, el("em", "", "ẢNH BCN"));
+    const mascot = el("span", "shelf-mascot");
+    const m = el("img"); m.src = "assets/mascot.png"; m.alt = "Mascot CLB"; m.loading = "lazy";
+    m.addEventListener("error", () => { m.remove(); mascot.classList.add("no-img"); });
+    mascot.appendChild(m);
+    row.append(letter, frame, mascot);
+    shelf.append(plate, row, el("span", "shelf-board"));
+    shelf.addEventListener("click", () => open(i, shelf));
+    room.appendChild(shelf);
+    hall.appendChild(room);
+  });
+
+  function open(i, trigger) {
+    const t = BCN_TERMS[i];
+    lastTrigger = trigger;
+    qsa(".shelf.is-active").forEach(s => s.classList.remove("is-active"));
+    trigger.classList.add("is-active");
+    qs("#bcnPeriod").textContent = "Hành lang kỷ niệm";
+    qs("#bcnTitle").textContent = t.period;
+    const photo = qs("#bcnPhoto");
+    photo.hidden = false; photo.src = t.photo; photo.alt = `Ảnh tập thể Ban chủ nhiệm ${t.period}`;
+    photo.onerror = () => { photo.hidden = true; };
+    const list = qs("#bcnMembers"); list.replaceChildren();
+    t.members.forEach(([role, name]) => {
+      const li = el("li"); li.append(el("span", "", role), el("strong", "", name)); list.appendChild(li);
+    });
+    const letter = qs("#bcnLetter"); letter.replaceChildren();
+    t.letter.forEach(p => letter.appendChild(el("p", "", p)));
+    overlay.hidden = false;
+    document.body.classList.add("bcn-lock");
+    requestAnimationFrame(() => {
+      overlay.classList.add("show");
+      panel.classList.add("open");
+      panel.setAttribute("aria-hidden", "false");
+      panel.scrollTop = 0;
+      closeBtn?.focus({ preventScroll: true });
+    });
+  }
+
+  function close() {
+    if (!panel.classList.contains("open")) return;
+    panel.classList.remove("open");
+    panel.setAttribute("aria-hidden", "true");
+    overlay.classList.remove("show");
+    document.body.classList.remove("bcn-lock");
+    qsa(".shelf.is-active").forEach(s => s.classList.remove("is-active"));
+    setTimeout(() => { overlay.hidden = true; }, 320);
+    lastTrigger?.focus({ preventScroll: true });
+  }
+
+  closeBtn?.addEventListener("click", close);
+  overlay.addEventListener("click", close);
+  document.addEventListener("keydown", e => {
+    if (!panel.classList.contains("open")) return;
+    if (e.key === "Escape") { close(); return; }
+    if (e.key !== "Tab") return;
+    const f = qsa("button, a[href]", panel);
+    if (!f.length) return;
+    const first = f[0], last = f[f.length - 1];
+    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+  });
+}
+
+/* Tạm dừng video/nhạc khi ẩn tab, chỉ phát lại phần đã bị mình dừng */
+function initVisibilityPause() {
+  const paused = new Set();
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) {
+      qsa("video, audio").forEach(m => { if (!m.paused) { m.pause(); paused.add(m); } });
+    } else {
+      paused.forEach(m => m.play().catch(() => {}));
+      paused.clear();
+    }
+  });
+}
+
+/* Lazy-load mọi ảnh ngoài header/preloader/intro */
+function initLazyImages() {
+  qsa("img:not([loading])").forEach(img => {
+    if (img.closest(".site-header, #preloader, .intro-screen")) return;
+    img.loading = "lazy";
+    img.decoding = "async";
+  });
+}
+
+/* Mỗi tính năng chạy độc lập: 1 phần tử thiếu hoặc 1 lỗi không làm gãy cả script */
 function init() {
-  initScrollLoop();
-  initNavbar();
-  initSmoothScroll();
-  initScrollReveal();
-  initFAQ();
-  initQRButtons();
-  initActivityModal();
-  initActivityVideos();
-  initSocialLinks();
-  initSocialHub();
-  initMagneticButtons();
-  initConfettiBurst();
-  initCardTilt();
-  initParallax();
-  initParticles();
-  initScrollProgress();
-  initBackToTop();
-  initActiveNavigation();
-  initReducedMotion();
-  initLoading();
-  initMissingAssets();
- 
-  // Nhạc + màn hình bắt đầu
-  initBackgroundMusic();
+  [
+    initScrollLoop, initNavbar, initSmoothScroll, initScrollReveal, initFAQ,
+    initQRButtons, initActivityModal, initActivityVideos, initSocialLinks,
+    initSocialHub, initMagneticButtons, initConfettiBurst, initCardTilt,
+    initParallax, initParticles, initScrollProgress, initBackToTop,
+    initActiveNavigation, initReducedMotion, initLoading, initLazyImages,
+    initMissingAssets, initBCN, initVisibilityPause, initBackgroundMusic
+  ].forEach(fn => {
+    try { fn(); } catch (err) { console.warn(`[${fn.name}]`, err); }
+  });
 }
 document.addEventListener("DOMContentLoaded", init);
