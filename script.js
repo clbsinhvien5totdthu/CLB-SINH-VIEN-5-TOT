@@ -663,16 +663,33 @@ function initBackgroundMusic() {
   updateMusicButton();
 }
 
-/* ---------- BAN CHỦ NHIỆM: dữ liệu (thêm nhiệm kỳ mới = thêm 1 object vào đầu/cuối mảng) ---------- */
+/* ---------- BAN CHỦ NHIỆM: dữ liệu ----------
+   Mỗi nhiệm kỳ = 1 kệ. Mỗi thành viên = 1 khung ảnh vuông: [chức vụ, họ tên, đường dẫn ảnh vuông].
+   Thêm người = thêm 1 dòng vào members; thêm nhiệm kỳ = thêm 1 object. */
 const BCN_TERMS = [
-  { id: "2022-2023", period: "Nhiệm kỳ 2022 – 2023", photo: "assets/bcn-2022-2023.jpg",
-    members: [["Chủ nhiệm", "[Họ và tên]"], ["Phó Chủ nhiệm", "[Họ và tên]"], ["Trưởng ban Truyền thông", "[Họ và tên]"], ["Trưởng ban Sự kiện", "[Họ và tên]"]],
+  { id: "2022-2023", period: "Nhiệm kỳ 2022 – 2023",
+    members: [
+      ["Chủ nhiệm", "[Họ và tên]", "assets/bcn/2022-2023/chu-nhiem.jpg"],
+      ["Phó Chủ nhiệm", "[Họ và tên]", "assets/bcn/2022-2023/pho-chu-nhiem.jpg"],
+      ["Trưởng ban Truyền thông", "[Họ và tên]", "assets/bcn/2022-2023/truong-ban-1.jpg"],
+      ["Trưởng ban Sự kiện", "[Họ và tên]", "assets/bcn/2022-2023/truong-ban-2.jpg"]
+    ],
     letter: ["[Thay bằng nội dung bức thư của Ban chủ nhiệm nhiệm kỳ 2022 – 2023.]", "Mỗi đoạn là một phần tử trong mảng letter."] },
-  { id: "2023-2024", period: "Nhiệm kỳ 2023 – 2024", photo: "assets/bcn-2023-2024.jpg",
-    members: [["Chủ nhiệm", "[Họ và tên]"], ["Phó Chủ nhiệm", "[Họ và tên]"], ["Trưởng ban Truyền thông", "[Họ và tên]"], ["Trưởng ban Sự kiện", "[Họ và tên]"]],
+  { id: "2023-2024", period: "Nhiệm kỳ 2023 – 2024",
+    members: [
+      ["Chủ nhiệm", "[Họ và tên]", "assets/bcn/2023-2024/chu-nhiem.jpg"],
+      ["Phó Chủ nhiệm", "[Họ và tên]", "assets/bcn/2023-2024/pho-chu-nhiem.jpg"],
+      ["Trưởng ban Truyền thông", "[Họ và tên]", "assets/bcn/2023-2024/truong-ban-1.jpg"],
+      ["Trưởng ban Sự kiện", "[Họ và tên]", "assets/bcn/2023-2024/truong-ban-2.jpg"]
+    ],
     letter: ["[Thay bằng nội dung bức thư của Ban chủ nhiệm nhiệm kỳ 2023 – 2024.]"] },
-  { id: "2024-2025", period: "Nhiệm kỳ 2024 – 2025", photo: "assets/bcn-2024-2025.jpg",
-    members: [["Chủ nhiệm", "[Họ và tên]"], ["Phó Chủ nhiệm", "[Họ và tên]"], ["Trưởng ban Truyền thông", "[Họ và tên]"], ["Trưởng ban Sự kiện", "[Họ và tên]"]],
+  { id: "2024-2025", period: "Nhiệm kỳ 2024 – 2025",
+    members: [
+      ["Chủ nhiệm", "[Họ và tên]", "assets/bcn/2024-2025/chu-nhiem.jpg"],
+      ["Phó Chủ nhiệm", "[Họ và tên]", "assets/bcn/2024-2025/pho-chu-nhiem.jpg"],
+      ["Trưởng ban Truyền thông", "[Họ và tên]", "assets/bcn/2024-2025/truong-ban-1.jpg"],
+      ["Trưởng ban Sự kiện", "[Họ và tên]", "assets/bcn/2024-2025/truong-ban-2.jpg"]
+    ],
     letter: ["[Thay bằng nội dung bức thư của Ban chủ nhiệm nhiệm kỳ 2024 – 2025.]"] }
 ];
 
@@ -681,6 +698,17 @@ function el(tag, cls, text) {
   if (cls) n.className = cls;
   if (text) n.textContent = text;
   return n;
+}
+
+/* Khung ảnh vuông; thiếu ảnh thì hiện chữ cái đầu của tên */
+function bcnPhoto(src, name) {
+  const wrap = el("span", "bcn-sq");
+  const hint = el("em", "", (name.replace(/[\[\]]/g, "").trim()[0] || "5").toUpperCase());
+  const img = el("img");
+  img.src = src; img.alt = name; img.loading = "lazy"; img.decoding = "async";
+  img.addEventListener("error", () => img.remove());
+  wrap.append(hint, img);
+  return wrap;
 }
 
 function initBCN() {
@@ -698,22 +726,18 @@ function initBCN() {
     shelf.dataset.index = i;
     shelf.setAttribute("aria-haspopup", "dialog");
     shelf.setAttribute("aria-label", `Mở ${t.period}`);
-    const plate = el("span", "shelf-plate", t.period);
     const row = el("span", "shelf-row");
     const letter = el("span", "shelf-letter");
     letter.innerHTML = envelope;
     letter.appendChild(el("small", "", "Lá thư"));
-    const frame = el("span", "shelf-frame");
-    const img = el("img");
-    img.src = t.photo; img.alt = ""; img.loading = "lazy"; img.decoding = "async";
-    img.addEventListener("error", () => { img.remove(); });
-    frame.append(img, el("em", "", "ẢNH BCN"));
+    const frames = el("span", "shelf-frames");
+    t.members.forEach(([role, name, src]) => frames.appendChild(bcnPhoto(src, name)));
     const mascot = el("span", "shelf-mascot");
     const m = el("img"); m.src = "assets/mascot.png"; m.alt = "Mascot CLB"; m.loading = "lazy";
     m.addEventListener("error", () => { m.remove(); mascot.classList.add("no-img"); });
     mascot.appendChild(m);
-    row.append(letter, frame, mascot);
-    shelf.append(plate, row, el("span", "shelf-board"));
+    row.append(letter, frames, mascot);
+    shelf.append(el("span", "shelf-plate", t.period), row, el("span", "shelf-board"));
     shelf.addEventListener("click", () => open(i, shelf));
     room.appendChild(shelf);
     hall.appendChild(room);
@@ -726,12 +750,12 @@ function initBCN() {
     trigger.classList.add("is-active");
     qs("#bcnPeriod").textContent = "Hành lang kỷ niệm";
     qs("#bcnTitle").textContent = t.period;
-    const photo = qs("#bcnPhoto");
-    photo.hidden = false; photo.src = t.photo; photo.alt = `Ảnh tập thể Ban chủ nhiệm ${t.period}`;
-    photo.onerror = () => { photo.hidden = true; };
-    const list = qs("#bcnMembers"); list.replaceChildren();
-    t.members.forEach(([role, name]) => {
-      const li = el("li"); li.append(el("span", "", role), el("strong", "", name)); list.appendChild(li);
+    const gallery = qs("#bcnGallery"); gallery.replaceChildren();
+    t.members.forEach(([role, name, src]) => {
+      const fig = el("figure", "bcn-person");
+      fig.append(bcnPhoto(src, name), el("figcaption", "", ""));
+      const cap = fig.lastChild; cap.append(el("strong", "", name), el("span", "", role));
+      gallery.appendChild(fig);
     });
     const letter = qs("#bcnLetter"); letter.replaceChildren();
     t.letter.forEach(p => letter.appendChild(el("p", "", p)));
