@@ -14,6 +14,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
+  <noscript><style>.reveal{opacity:1!important;transform:none!important;filter:none!important}#preloader,.intro-screen{display:none!important}body.intro-active{overflow:auto!important}.faq-answer{height:auto!important}</style></noscript>
 </head>
 
 <!--
@@ -60,7 +61,7 @@
       </a>
       <!-- [ĐỔI #3] thêm class="active" cho link của trang hiện tại -->
       <div class="nav-links">
-        <a href="index.html#sinh-vien-5-tot">← Hệ Mặt Trời</a>
+        <a href="faq.html#sinh-vien-5-tot">← Hệ Mặt Trời</a>
         <a href="tieuchi1.html">Đạo đức tốt</a>
         <a class="active" href="tieuchi2.html" aria-current="page">Học tập tốt</a>
         <a href="tieuchi3.html">Thể lực tốt</a>
@@ -71,7 +72,7 @@
       <button class="menu-toggle" type="button" aria-label="Mở menu" aria-expanded="false"><span></span><span></span></button>
     </nav>
     <div class="mobile-menu" aria-hidden="true">
-      <a href="index.html#sinh-vien-5-tot">← Hệ Mặt Trời</a>
+      <a href="faq.html#sinh-vien-5-tot">← Hệ Mặt Trời</a>
       <a href="tieuchi1.html">Đạo đức tốt</a>
       <a href="tieuchi2.html">Học tập tốt</a>
       <a href="tieuchi3.html">Thể lực tốt</a>
@@ -224,17 +225,17 @@
 
         </div><!-- /.why-list -->
 
-        <!-- [ĐỔI #6] Điều hướng hành tinh Trước / Sau (xoay vòng 1→2→3→4→5→1) -->
+        <!-- [ĐỔI #6] Điều hướng hành tinh Trước / Sau (xoay vòng 1→2→3→4→5→1) — nhớ đổi cả --pc theo màu tiêu chí đích -->
         <nav class="crit-pager reveal" aria-label="Chuyển tiêu chí">
-          <a class="is-prev" style="--pc:#a78bfa" href="tieuchi1.html">
+          <a class="is-prev" style="--pc:#22d3ee" href="tieuchi1.html">
             <small>← TIÊU CHÍ TRƯỚC</small><strong>Đạo đức tốt</strong>
           </a>
-          <a class="is-next" style="--pc:#4d9bff" href="tieuchi3.html">
+          <a class="is-next" style="--pc:#fbbf24" href="tieuchi3.html">
             <small>TIÊU CHÍ TIẾP THEO →</small><strong>Thể lực tốt</strong>
           </a>
         </nav>
         <div class="crit-home reveal">
-          <a class="button button-ghost" href="index.html#sinh-vien-5-tot">VỀ HỆ MẶT TRỜI <span>↺</span></a>
+          <a class="button button-ghost" href="faq.html#sinh-vien-5-tot">VỀ HỆ MẶT TRỜI <span>↺</span></a>
         </div>
       </div>
     </section>
@@ -262,7 +263,7 @@
     </div>
     <div class="shell footer-bottom">
       <span>© 2026 CLB Sinh viên 5 Tốt – Trường Đại học Đồng Tháp</span>
-      <a href="index.html#sinh-vien-5-tot">← VỀ HỆ MẶT TRỜI</a>
+      <a href="faq.html#sinh-vien-5-tot">← VỀ HỆ MẶT TRỜI</a>
     </div>
   </footer>
 
@@ -270,28 +271,5 @@
   <div class="toast" role="status" aria-live="polite"></div>
 
   <script src="script.js"></script>
-  <script>
-    /* Bổ sung nhỏ cho accordion (script.js đã lo phần mở/đóng):
-       1) Mở sẵn câu hỏi khi link có #why-N (ví dụ tieuchi1.html#why-3).
-       2) Tính lại chiều cao khối đang mở khi xoay màn hình / đổi cỡ chữ,
-          vì script.js gán chiều cao cố định lúc bấm.
-       Đăng ký SAU script.js nên chạy sau initFAQ(). */
-    document.addEventListener("DOMContentLoaded", function () {
-      var hash = location.hash;
-      if (/^#why-\d+$/.test(hash)) {
-        var btn = document.querySelector(hash + " button");
-        if (btn) btn.click();
-      }
-      var timer;
-      window.addEventListener("resize", function () {
-        clearTimeout(timer);
-        timer = setTimeout(function () {
-          document.querySelectorAll(".faq-item.open .faq-answer").forEach(function (a) {
-            a.style.height = a.scrollHeight + "px";
-          });
-        }, 120);
-      }, { passive: true });
-    });
-  </script>
 </body>
 </html>
