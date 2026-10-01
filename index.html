@@ -81,126 +81,36 @@
         <span class="brand-copy"><strong>CLB SINH VIÊN 5 TỐT</strong><small>TRƯỜNG ĐẠI HỌC ĐỒNG THÁP</small></span>
       </a>
       <div class="nav-links">
-        <a href="#trang-chu">Trang chủ</a>
-        <a href="#sinh-vien-5-tot">Sinh viên 5 Tốt</a>
-        <a href="#quyen-loi">Quyền lợi</a>
-        <a href="#hoat-dong">Hoạt động</a>
-        <a href="#nhom-ctv">Nhóm CTV</a>
-        <a href="#cach-tham-gia">Cách tham gia</a>
-        <a href="#mang-xa-hoi">Mạng xã hội</a>
+        <a href="index.html">Trang chủ</a>
         <a href="faq.html">Vạn câu hỏi</a>
+        <a href="banchunhiem.html">Ban chủ nhiệm</a>
       </div>
       <a class="nav-cta magnetic" href="#nhom-ctv">THAM GIA NGAY <span>↗</span></a>
       <button class="menu-toggle" type="button" aria-label="Mở menu" aria-expanded="false"><span></span><span></span></button>
     </nav>
     <div class="mobile-menu" aria-hidden="true">
-      <a href="#trang-chu">Trang chủ</a>
-      <a href="#sinh-vien-5-tot">Sinh viên 5 Tốt</a>
-      <a href="#quyen-loi">Quyền lợi</a>
-      <a href="#hoat-dong">Hoạt động</a>
-      <a href="#nhom-ctv">Nhóm CTV</a>
-      <a href="#cach-tham-gia">Cách tham gia</a>
-      <a href="#mang-xa-hoi">Mạng xã hội</a>
+      <a href="index.html">Trang chủ</a>
       <a href="faq.html">Vạn câu hỏi</a>
-      <a class="button button-primary" href="#nhom-ctv">THAM GIA NGAY <span>↗</span></a>
+      <a href="banchunhiem.html">Ban chủ nhiệm</a>
+      <a class="button button-primary" href="index.html#nhom-ctv">THAM GIA NGAY <span>↗</span></a>
     </div>
   </header>
 
   <main>
-    <!-- =====================================================================
-         [MỚI] SOLAR SYSTEM HUB — thay cho HERO cũ + khối "pillars-wrap" cũ.
-         Mặt trời = logo CLB. 5 hành tinh = 5 tiêu chí (thẻ <a> -> tieuchiN.html).
-         - Desktop: quỹ đạo xoay, hover mặt trời/hành tinh => dừng quay.
-         - ≤900px: tự chuyển thành lưới thẻ dễ chạm (xem style-patch.css).
-         Đổi link đích: sửa href="tieuchiN.html" bên dưới.
-         ===================================================================== -->
-    <section class="hub section-dark" id="trang-chu" aria-labelledby="hub-title">
+    <section class="hub home-hero section-dark" id="trang-chu" aria-labelledby="hub-title">
       <div class="hub-stars" aria-hidden="true"></div>
       <div class="hero-bg-grid" aria-hidden="true"></div>
-
-      <div class="shell hub-head reveal">
-        <div class="eyebrow"><span class="pulse-dot"></span> TRƯỜNG ĐẠI HỌC ĐỒNG THÁP</div>
-        <h1 id="hub-title" class="hub-title"><span class="nw">CLB SINH VIÊN</span> <em>5 TỐT</em></h1>
-        <p class="hub-lead">Sinh viên 5 Tốt là hành trình hoàn thiện bản thân qua 5 tiêu chí. Mỗi tiêu chí là một hành tinh quay quanh CLB — chọn một hành tinh để khám phá lời giải đáp “vì sao”.</p>
-      </div>
-
-      <!-- id="sinh-vien-5-tot" giữ nguyên để link menu "Sinh viên 5 Tốt" vẫn chạy -->
-      <div class="solar-system" id="sinh-vien-5-tot">
-        <div class="solar-core">
-          <!-- quỹ đạo trang trí -->
-          <span class="sys-ring sys-ring-3" aria-hidden="true"></span>
-          <span class="sys-ring sys-ring-1" aria-hidden="true"></span>
-          <span class="sys-ring sys-ring-2" aria-hidden="true"></span>
-
-          <!-- MẶT TRỜI: logo CLB. Hover/focus => các hành tinh dừng quay -->
-          <div class="sun" tabindex="0" role="img" aria-label="Logo CLB Sinh viên 5 Tốt – trung tâm của hệ 5 tiêu chí">
-            <span class="sun-glow" aria-hidden="true"></span>
-            <span class="sun-corona" aria-hidden="true"></span>
-            <span class="sun-body"><img src="assets/z4220403054556_ecd0b96889444052ed9708d87d5dfe69-removebg-preview (1).png" alt=""></span>
+      <div class="shell home-hero-inner">
+        <div class="home-hero-copy reveal">
+          <div class="eyebrow"><span class="pulse-dot"></span> TRƯỜNG ĐẠI HỌC ĐỒNG THÁP</div>
+          <h1 id="hub-title" class="hub-title"><span class="nw">CLB SINH VIÊN</span> <em>5 TỐT</em></h1>
+          <p class="hub-lead">Nơi sinh viên rèn luyện Đạo đức, Học tập, Thể lực, Tình nguyện và Hội nhập — để hoàn thiện bản thân và lan tỏa giá trị tốt đẹp trong cộng đồng.</p>
+          <div class="home-hero-actions">
+            <a class="button button-primary magnetic" href="#nhom-ctv">THAM GIA NGAY <span>↗</span></a>
+            <a class="button button-ghost" href="faq.html">VẠN CÂU HỎI VÌ SAO</a>
           </div>
-
-          <!-- 5 HÀNH TINH: phải đứng SAU .sun (CSS dùng bộ chọn anh em ~) -->
-          <ol class="orbit" aria-label="5 tiêu chí Sinh viên 5 Tốt">
-          <li class="planet-slot">
-            <a class="planet" href="tieuchi1.html" aria-label="Tiêu chí 01: Đạo Đức Tốt — Rèn luyện phẩm chất, trách nhiệm và lối sống tích cực.">
-              <span class="planet-body">
-                <span class="planet-icon"><img src="assets/icon-dao-duc-tot.png" alt="" loading="lazy"></span>
-                <span class="planet-num">01</span>
-              </span>
-              <span class="planet-label"><strong>ĐẠO ĐỨC TỐT</strong><em>KHÁM PHÁ ↗</em></span>
-              <span class="planet-desc">Rèn luyện phẩm chất, trách nhiệm và lối sống tích cực.</span>
-            </a>
-          </li>
-          <li class="planet-slot">
-            <a class="planet" href="tieuchi2.html" aria-label="Tiêu chí 02: Học Tập Tốt — Chủ động học hỏi, nâng cao kiến thức và tinh thần cầu tiến.">
-              <span class="planet-body">
-                <span class="planet-icon"><img src="assets/icon-hoc-tap-tot.png" alt="" loading="lazy"></span>
-                <span class="planet-num">02</span>
-              </span>
-              <span class="planet-label"><strong>HỌC TẬP TỐT</strong><em>KHÁM PHÁ ↗</em></span>
-              <span class="planet-desc">Chủ động học hỏi, nâng cao kiến thức và tinh thần cầu tiến.</span>
-            </a>
-          </li>
-          <li class="planet-slot">
-            <a class="planet" href="tieuchi3.html" aria-label="Tiêu chí 03: Thể Lực Tốt — Duy trì sức khỏe và tinh thần năng động trong học tập, hoạt động.">
-              <span class="planet-body">
-                <span class="planet-icon"><img src="assets/icon-the-luc-tot.png" alt="" loading="lazy"></span>
-                <span class="planet-num">03</span>
-              </span>
-              <span class="planet-label"><strong>THỂ LỰC TỐT</strong><em>KHÁM PHÁ ↗</em></span>
-              <span class="planet-desc">Duy trì sức khỏe và tinh thần năng động trong học tập, hoạt động.</span>
-            </a>
-          </li>
-          <li class="planet-slot">
-            <a class="planet" href="tieuchi4.html" aria-label="Tiêu chí 04: Tình Nguyện Tốt — Lan tỏa giá trị tích cực qua tinh thần sẻ chia và cống hiến.">
-              <span class="planet-body">
-                <span class="planet-icon"><img src="assets/icon-tinh-nguyen-tot.png" alt="" loading="lazy"></span>
-                <span class="planet-num">04</span>
-              </span>
-              <span class="planet-label"><strong>TÌNH NGUYỆN TỐT</strong><em>KHÁM PHÁ ↗</em></span>
-              <span class="planet-desc">Lan tỏa giá trị tích cực qua tinh thần sẻ chia và cống hiến.</span>
-            </a>
-          </li>
-          <li class="planet-slot">
-            <a class="planet" href="tieuchi5.html" aria-label="Tiêu chí 05: Hội Nhập Tốt — Mở rộng tư duy, kỹ năng và khả năng kết nối trong môi trường mới.">
-              <span class="planet-body">
-                <span class="planet-icon"><img src="assets/icon-hoi-nhap-tot.png" alt="" loading="lazy"></span>
-                <span class="planet-num">05</span>
-              </span>
-              <span class="planet-label"><strong>HỘI NHẬP TỐT</strong><em>KHÁM PHÁ ↗</em></span>
-              <span class="planet-desc">Mở rộng tư duy, kỹ năng và khả năng kết nối trong môi trường mới.</span>
-            </a>
-          </li>
-          </ol>
         </div>
-      </div>
-
-      <div class="hub-foot reveal">
-        <span class="hub-hint"><span class="pulse-dot"></span>
-          <span class="hint-hover">Rê chuột vào mặt trời để dừng quỹ đạo, rồi chọn một hành tinh.</span>
-          <span class="hint-touch">Chạm vào một tiêu chí để khám phá.</span>
-        </span>
-        <a class="hub-more" href="#quyen-loi">TÌM HIỂU VỀ CLB <span>↓</span></a>
+        <div class="home-hero-logo reveal" aria-hidden="true"><img src="assets/z4220403054556_ecd0b96889444052ed9708d87d5dfe69-removebg-preview (1).png" alt="" width="420" height="420"></div>
       </div>
     </section>
 
@@ -544,5 +454,3 @@
 </body>
 </html>
 
-</body>
-</html>
