@@ -661,14 +661,12 @@ function initBackgroundMusic() {
    Mascot dùng chung: assets/mascot.png. Thêm nhiệm kỳ = thêm 1 object vào BCN_TERMS. */
 const BCN_ROLES = [
   ["Chủ nhiệm", "chu-nhiem"], ["Phó Chủ nhiệm", "pho-chu-nhiem"], ["Phó Chủ nhiệm", "pho-chu-nhiem-2"],
-  ["Trưởng ban Truyền thông", "truong-ban-1"], ["Trưởng ban Sự kiện", "truong-ban-2"],
-  ["Thành viên BCN", "thanh-vien-1"], ["Thành viên BCN", "thanh-vien-2"],
-  ["Thành viên BCN", "thanh-vien-3"], ["Thành viên BCN", "thanh-vien-4"]
+  ["Trưởng ban Truyền thông", "truong-ban-1"], ["Trưởng ban Văn Nghệ", "truong-ban-2"],
+  ["Trưởng ban Kỹ thuật", "truong-ban-3"], ["Trưởng ban Sáng tạo", "truong-ban-4"],
+  ["Trưởng ban Nhân sự", "truong-ban-5"], ["Trưởng ban Tư vấn", "truong-ban-6"]
 ];
 const BCN_TERMS = [
-  { id: "2022-2023", names: [], letter: ["[Thay bằng nội dung bức thư của Ban chủ nhiệm nhiệm kỳ 2022 – 2023.]", "Mỗi đoạn là một phần tử trong mảng letter."] },
-  { id: "2023-2024", names: [], letter: ["[Thay bằng nội dung bức thư của Ban chủ nhiệm nhiệm kỳ 2023 – 2024.]"] },
-  { id: "2024-2025", names: [], letter: ["[Thay bằng nội dung bức thư của Ban chủ nhiệm nhiệm kỳ 2024 – 2025.]"] }
+  { id: "2025-2026", names: [], letter: ["[Thay bằng nội dung bức thư của Ban chủ nhiệm nhiệm kỳ 2022 – 2023.]", "Mỗi đoạn là một phần tử trong mảng letter."] },
 ];
 
 function el(tag, cls, text) {
