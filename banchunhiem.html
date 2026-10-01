@@ -55,23 +55,20 @@
       <div class="shell">
         <span class="section-kicker">HÀNH LANG KỶ NIỆM</span>
         <h1>BAN CHỦ NHIỆM<br><span>QUA CÁC NHIỆM KỲ</span></h1>
-        <p>Mỗi chiếc kệ là một nhiệm kỳ. Bấm vào kệ để mở bức thư và xem các thành viên Ban chủ nhiệm.</p>
+        <p>Mỗi bức tường là một nhiệm kỳ. Bấm vào khung ảnh, lá thư hoặc mascot để phóng to và xem rõ.</p>
       </div>
     </section>
     <div class="bcn-hall" id="bcnHall" aria-label="Danh sách nhiệm kỳ Ban chủ nhiệm">
       <noscript><p class="shell">Vui lòng bật JavaScript để xem các nhiệm kỳ.</p></noscript>
     </div>
   </main>
-  <div class="bcn-overlay" id="bcnOverlay" hidden></div>
-  <aside class="bcn-panel" id="bcnPanel" role="dialog" aria-modal="true" aria-labelledby="bcnTitle" aria-hidden="true" tabindex="-1">
+
+  <div class="bcn-zoom" id="bcnZoom" role="dialog" aria-modal="true" aria-label="Xem chi tiết" hidden>
     <button class="bcn-close" type="button" aria-label="Đóng">×</button>
-    <p class="bcn-period" id="bcnPeriod"></p>
-    <h2 id="bcnTitle"></h2>
-    <h3>Thành viên Ban chủ nhiệm</h3>
-    <div class="bcn-gallery" id="bcnGallery"></div>
-    <h3>Thư gửi thế hệ sau</h3>
-    <div class="bcn-letter" id="bcnLetter"></div>
-  </aside>
+    <button class="bcn-step bcn-prev" type="button" aria-label="Mục trước">‹</button>
+    <div class="bcn-stage"></div>
+    <button class="bcn-step bcn-next" type="button" aria-label="Mục sau">›</button>
+  </div>
 
   <footer class="footer">
     <div class="shell footer-grid">
@@ -100,6 +97,10 @@
 
   <button class="back-top" type="button" aria-label="Về đầu trang">↑</button>
   <div class="toast" role="status" aria-live="polite"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>
 
   <script src="script.js"></script>
 </body>
