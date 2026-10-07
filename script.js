@@ -666,7 +666,7 @@ const BCN_ROLES = [
   ["Trưởng ban Nhân sự", "truong-ban-5"], ["Trưởng ban Tư vấn", "truong-ban-6"]
 ];
 const BCN_TERMS = [
-  { id: "2025-2026", names: [], letter: ["[Thay bằng nội dung bức thư của Ban chủ nhiệm nhiệm kỳ 2022 – 2023.]", "Mỗi đoạn là một phần tử trong mảng letter."] },
+  { id: "2026-2027", names: [], letter: ["[Thay bằng nội dung bức thư của Ban chủ nhiệm nhiệm kỳ 2026 – 2027.]", "Mỗi đoạn là một phần tử trong mảng letter."] },
 ];
 
 function el(tag, cls, text) {
