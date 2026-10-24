@@ -665,8 +665,21 @@ const BCN_ROLES = [
   ["Trưởng ban Kỹ thuật", "truong-ban-3"], ["Trưởng ban Sáng tạo", "truong-ban-4"],
   ["Trưởng ban Nhân sự", "truong-ban-5"], ["Trưởng ban Tư vấn", "truong-ban-6"]
 ];
+const BCN_DIR = "assets/bcn/2026-2027/";
 const BCN_TERMS = [
-  { id: "2026-2027", names: [], letter: ["[Thay bằng nội dung bức thư của Ban chủ nhiệm nhiệm kỳ 2026 – 2027.]", "Mỗi đoạn là một phần tử trong mảng letter."] },
+  { id: "2026-2027",
+    members: [
+      ["Chủ nhiệm", "Kim Thư", BCN_DIR + "kim-thu.jpg"],
+      ["Phó Chủ nhiệm", "Trương Ngọc Hân", BCN_DIR + "truong-ngoc-han.jpg"],
+      ["Phó Chủ nhiệm", "Thanh Tài", BCN_DIR + "thanh-tai.jpg"],
+      ["Trưởng ban Sáng tạo", "Thiên Lan", BCN_DIR + "thien-lan.jpg"],
+      ["Trưởng ban Văn Nghệ", "Trung", BCN_DIR + "trung.jpg"],
+      ["Trưởng ban Truyền thông", "Quách Huyền", BCN_DIR + "quach-huyen.jpg"],
+      ["Trưởng ban Kỹ thuật", "Quốc Cường", BCN_DIR + "quoc-cuong.jpg"],
+      ["Trưởng ban Nhân sự", "Nguyễn Ngọc Hân", BCN_DIR + "nguyen-ngoc-han.jpg"],
+      ["Trưởng ban Tư vấn", "Phương Anh", BCN_DIR + "phuong-anh.jpg"]
+    ],
+    letter: ["[Thay bằng nội dung bức thư của Ban chủ nhiệm nhiệm kỳ 2026 – 2027.]", "Mỗi đoạn là một phần tử trong mảng letter."] },
 ];
 
 function el(tag, cls, text) {
@@ -708,6 +721,9 @@ function initBCN() {
     const members = t.members || BCN_ROLES.map(([role, slug], i) => [role, t.names?.[i] || "[Họ và tên]", `assets/bcn/${t.id}/${slug}.jpg`]);
     const room = el("section", "bcn-room"), wall = el("div", "bcn-wall");
     const frames = el("div", "bcn-frames"), shelf = el("div", "bcn-shelf");
+    /* chia hàng theo cấp bậc: Chủ nhiệm / Phó Chủ nhiệm / Trưởng ban */
+    const tiers = [el("div", "bcn-tier bcn-tier-1"), el("div", "bcn-tier bcn-tier-2"), el("div", "bcn-tier bcn-tier-3")];
+    tiers.forEach(t => frames.appendChild(t));
     room.setAttribute("aria-label", period);
     const list = [];
     /* mỗi "vật" trên tường là 1 nút; build() trả về nội dung hiển thị khi phóng to */
@@ -720,8 +736,10 @@ function initBCN() {
     };
     members.forEach(([role, name, src]) => {
       const b = el("button", "bcn-frame");
-      b.append(bcnPhoto(src, name), el("span", "bcn-tag", name));
-      frames.appendChild(add(b, `Phóng to ảnh: ${name} – ${role}`, () => [bcnPhoto(src, name), el("h2", "", name), el("p", "", `${role} · ${period}`)]));
+      const tag = el("span", "bcn-tag"); tag.append(el("strong", "", name), el("small", "", role));
+      b.append(bcnPhoto(src, name), tag);
+      const tier = /^Chủ nhiệm/.test(role) ? 0 : /^Phó/.test(role) ? 1 : 2;
+      tiers[tier].appendChild(add(b, `Phóng to ảnh: ${name} – ${role}`, () => [bcnPhoto(src, name), el("h2", "", name), el("p", "", `${role} · ${period}`)]));
     });
     const lb = el("button", "bcn-obj"); lb.innerHTML = envelope; lb.appendChild(el("small", "", "Lá thư"));
     add(lb, `Mở lá thư ${period}`, () => {
