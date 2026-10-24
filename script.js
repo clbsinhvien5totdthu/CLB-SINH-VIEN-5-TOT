@@ -654,16 +654,23 @@ function initBackgroundMusic() {
   updateMusicButton();
 }
 
-/* ---------- BAN CHỦ NHIỆM: dữ liệu ----------
-   Mỗi nhiệm kỳ = 1 bức tường: các khung ảnh nhỏ (thường 9 người) + 1 kệ treo (lá thư + mascot).
-   Đổi tên: điền names theo đúng thứ tự BCN_ROLES. Ảnh: assets/bcn/<id>/<slug>.jpg (thiếu ảnh sẽ hiện chữ cái đầu).
-   Thêm/bớt người: sửa BCN_ROLES (dùng chung) hoặc khai báo members:[[chức vụ, tên, ảnh],...] riêng cho 1 nhiệm kỳ.
-   Mascot dùng chung: assets/mascot.png. Thêm nhiệm kỳ = thêm 1 object vào BCN_TERMS. */
+/* ---------- BAN CHỦ NHIỆM: hành lang cuộn ngang ----------
+   Mỗi nhiệm kỳ = 1 gian. Cuộn sang PHẢI để đi tới nhiệm kỳ kế tiếp.
+   Thêm nhiệm kỳ mới: thêm 1 object vào BCN_TERMS (đặt SAU nhiệm kỳ cũ). Khi có dữ liệu thật, bỏ `upcoming: true`
+   và điền members (ảnh toàn thân tỉ lệ 3:4), keepsakes (kỷ vật từng ban, có thể thêm ảnh ở phần tử thứ 4), letter.
+   Ảnh đặt tại assets/bcn/<id>/<tên>.jpg */
 const BCN_ROLES = [
-  ["Chủ nhiệm", "chu-nhiem"], ["Phó Chủ nhiệm", "pho-chu-nhiem"], ["Phó Chủ nhiệm", "pho-chu-nhiem-2"],
-  ["Trưởng ban Truyền thông", "truong-ban-1"], ["Trưởng ban Văn Nghệ", "truong-ban-2"],
-  ["Trưởng ban Kỹ thuật", "truong-ban-3"], ["Trưởng ban Sáng tạo", "truong-ban-4"],
-  ["Trưởng ban Nhân sự", "truong-ban-5"], ["Trưởng ban Tư vấn", "truong-ban-6"]
+  "Chủ nhiệm", "Phó Chủ nhiệm", "Phó Chủ nhiệm", "Trưởng ban Sáng tạo", "Trưởng ban Văn Nghệ",
+  "Trưởng ban Truyền thông", "Trưởng ban Kỹ thuật", "Trưởng ban Nhân sự", "Trưởng ban Tư vấn"
+];
+/* Kỷ vật tượng trưng của 6 ban: [tên ban, mã biểu tượng, mô tả, (ảnh thật – tuỳ chọn)] */
+const BCN_KEEPSAKES = [
+  ["Ban Sáng tạo", "sangtao", "Bóng đèn ý tưởng – nơi mọi chương trình của CLB bắt đầu. Thay mô tả này bằng kỷ vật thật của Ban Sáng tạo."],
+  ["Ban Văn Nghệ", "vannghe", "Nốt nhạc và tiếng hát của những đêm diễn. Thay mô tả này bằng kỷ vật thật của Ban Văn Nghệ."],
+  ["Ban Truyền thông", "truyenthong", "Ống kính lưu giữ và lan tỏa hình ảnh CLB. Thay mô tả này bằng kỷ vật thật của Ban Truyền thông."],
+  ["Ban Kỹ thuật", "kythuat", "Bánh răng vận hành mọi sự kiện trơn tru. Thay mô tả này bằng kỷ vật thật của Ban Kỹ thuật."],
+  ["Ban Nhân sự", "nhansu", "Sợi dây gắn kết các thành viên. Thay mô tả này bằng kỷ vật thật của Ban Nhân sự."],
+  ["Ban Tư vấn", "tuvan", "Những cuộc trò chuyện giúp bạn trẻ tìm đúng hướng. Thay mô tả này bằng kỷ vật thật của Ban Tư vấn."]
 ];
 const BCN_DIR = "assets/bcn/2026-2027/";
 const BCN_TERMS = [
@@ -680,6 +687,7 @@ const BCN_TERMS = [
       ["Trưởng ban Tư vấn", "Phương Anh", BCN_DIR + "phuong-anh.jpg"]
     ],
     letter: ["[Thay bằng nội dung bức thư của Ban chủ nhiệm nhiệm kỳ 2026 – 2027.]", "Mỗi đoạn là một phần tử trong mảng letter."] },
+  { id: "2027-2028", upcoming: true, letter: ["Gian này đang chờ thế hệ tiếp theo viết nên câu chuyện của mình."] },
 ];
 
 function el(tag, cls, text) {
@@ -689,16 +697,49 @@ function el(tag, cls, text) {
   return n;
 }
 
-/* Khung ảnh vuông; thiếu ảnh thì hiện chữ cái đầu của tên */
-function bcnPhoto(src, name) {
-  const wrap = el("span", "bcn-sq");
-  const hint = el("em", "", (name.replace(/[\[\]]/g, "").trim()[0] || "5").toUpperCase());
-  const img = el("img");
-  img.src = src; img.alt = name; img.loading = "lazy"; img.decoding = "async";
-  img.addEventListener("error", () => img.remove());
-  wrap.append(hint, img);
+/* Khung ảnh 3:4 (toàn thân); thiếu ảnh thì hiện chữ cái đầu (hoặc dấu ? cho nhiệm kỳ sắp tới) */
+function bcnPhoto(src, name, unknown) {
+  const wrap = el("span", "bcn-sq bcn-tall");
+  const hint = el("em", "", unknown ? "?" : (name.replace(/[\[\]]/g, "").trim()[0] || "5").toUpperCase());
+  wrap.append(hint);
+  if (src) {
+    const img = el("img");
+    img.src = src; img.alt = name; img.loading = "lazy"; img.decoding = "async";
+    img.addEventListener("error", () => img.remove());
+    wrap.append(img);
+  }
   return wrap;
 }
+
+/* Biểu tượng kỷ vật (SVG đơn giản, nét trắng trên huy hiệu màu) */
+const BCN_ICONS = {
+  sangtao: '<path d="M32 10a14 14 0 0 0-8 25.5V42h16v-6.5A14 14 0 0 0 32 10z"/><path d="M26 48h12M28 54h8"/>',
+  vannghe: '<path d="M26 44V18l22-5v26"/><circle cx="21" cy="44" r="6"/><circle cx="43" cy="39" r="6"/>',
+  truyenthong: '<rect x="8" y="20" width="48" height="32" rx="6"/><circle cx="32" cy="36" r="10"/><path d="M22 20l4-7h12l4 7"/>',
+  kythuat: '<circle cx="32" cy="32" r="16" stroke-width="8" stroke-dasharray="7.2 6.3"/><circle cx="32" cy="32" r="9"/>',
+  nhansu: '<circle cx="23" cy="24" r="7"/><circle cx="43" cy="26" r="6"/><path d="M9 50c0-9 6-14 14-14s14 5 14 14M38 38c8-1 17 3 17 12"/>',
+  tuvan: '<path d="M10 14h44a4 4 0 0 1 4 4v22a4 4 0 0 1-4 4H30l-12 10V44h-8a4 4 0 0 1-4-4V18a4 4 0 0 1 4-4z"/><path d="M20 26h24M20 34h14"/>'
+};
+const BCN_COLORS = { sangtao: "#f2a516", vannghe: "#d9467a", truyenthong: "#2f7fd6", kythuat: "#4c9a63", nhansu: "#8a5cc7", tuvan: "#e0703a" };
+function bcnBadge(key, cls) {
+  const b = el("span", `bcn-badge ${cls || ""}`);
+  b.style.setProperty("--bc", BCN_COLORS[key] || "#c0661a");
+  b.innerHTML = `<svg viewBox="0 0 64 64" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${BCN_ICONS[key] || ""}</svg>`;
+  return b;
+}
+
+let bcnUid = 0;
+/* Dải cờ treo + dây đèn trang trí đỉnh tường */
+function bcnBunting() {
+  const id = `bf${++bcnUid}`;
+  const wrap = el("div", "bcn-bunting"); wrap.setAttribute("aria-hidden", "true");
+  wrap.innerHTML = `<svg width="100%" height="46" preserveAspectRatio="none"><defs><pattern id="${id}" width="132" height="46" patternUnits="userSpaceOnUse">
+    <polygon points="6,6 36,6 21,40" fill="#e0503c"/><polygon points="40,6 70,6 55,40" fill="#f5b43c"/>
+    <polygon points="74,6 104,6 89,40" fill="#2f9fd6"/><polygon points="108,6 138,6 123,40" fill="#4c9a63"/></pattern></defs>
+    <path d="M0 6 H100%" stroke="#7a4b1e" stroke-width="2"/><rect y="4" width="100%" height="42" fill="url(#${id})"/></svg>`;
+  return wrap;
+}
+const BCN_PLANT = '<svg viewBox="0 0 90 150" aria-hidden="true"><path d="M45 100C20 90 12 60 22 30c14 10 22 34 23 70zM45 100c4-34 16-58 34-70 8 32-2 62-34 70zM45 100c-2-28 2-52 0-80 12 24 12 54 0 80z" fill="#4c9a63"/><path d="M26 100h38l-6 44H32z" fill="#c0661a"/><rect x="22" y="94" width="46" height="10" rx="4" fill="#a9541a"/></svg>';
 
 function initBCN() {
   const hall = qs("#bcnHall"), zoom = qs("#bcnZoom");
@@ -708,7 +749,6 @@ function initBCN() {
   const envelope = '<svg viewBox="0 0 64 48" aria-hidden="true"><rect x="2" y="6" width="60" height="40" rx="4" fill="#fffaf0" stroke="#a9722f" stroke-width="2"/><path d="M4 9l28 21L60 9" fill="none" stroke="#a9722f" stroke-width="2"/><circle cx="32" cy="30" r="6" fill="#e0503c"/></svg>';
   let items = [], at = 0, trigger = null, timer = 0;
 
-  /* Mascot: thiếu ảnh thì hiện hình tròn vàng có số 5 */
   const mascot = cls => {
     const s = el("span", `bcn-mascot ${cls}`), m = el("img");
     m.src = "assets/mascot.png"; m.alt = "Mascot CLB Sinh viên 5 Tốt"; m.decoding = "async";
@@ -716,17 +756,27 @@ function initBCN() {
     s.appendChild(m); return s;
   };
 
-  BCN_TERMS.forEach(t => {
+  /* khung chứa: thanh năm + dải cuộn + nút */
+  const years = el("nav", "bcn-years"); years.setAttribute("aria-label", "Chuyển nhanh giữa các nhiệm kỳ");
+  const rail = el("div", "bcn-rail"), view = el("div", "bcn-viewport"), corridor = el("div", "bcn-corridor");
+  view.tabIndex = 0; view.setAttribute("role", "region"); view.setAttribute("aria-label", "Hành lang Ban chủ nhiệm – cuộn ngang, sang phải là nhiệm kỳ kế tiếp");
+  view.appendChild(corridor);
+  const arrow = (cls, txt, label, d) => {
+    const a = el("button", `bcn-scroll ${cls}`, txt); a.type = "button"; a.setAttribute("aria-label", label);
+    a.addEventListener("click", () => view.scrollBy({ left: d * Math.max(260, view.clientWidth * .75), behavior: reducedMotion ? "auto" : "smooth" }));
+    return a;
+  };
+  const aL = arrow("bcn-scroll-l", "‹", "Cuộn sang trái – nhiệm kỳ trước", -1), aR = arrow("bcn-scroll-r", "›", "Cuộn sang phải – nhiệm kỳ kế tiếp", 1);
+  rail.append(view, aL, aR);
+  hall.append(years, rail, el("p", "bcn-hint", "← Kéo, vuốt hoặc dùng nút ‹ › · Cuộn sang phải để tới nhiệm kỳ kế tiếp →"));
+
+  BCN_TERMS.forEach((t, ti) => {
     const period = `Nhiệm kỳ ${t.id.replace("-", " – ")}`;
-    const members = t.members || BCN_ROLES.map(([role, slug], i) => [role, t.names?.[i] || "[Họ và tên]", `assets/bcn/${t.id}/${slug}.jpg`]);
-    const room = el("section", "bcn-room"), wall = el("div", "bcn-wall");
-    const frames = el("div", "bcn-frames"), shelf = el("div", "bcn-shelf");
-    /* chia hàng theo cấp bậc: Chủ nhiệm / Phó Chủ nhiệm / Trưởng ban */
-    const tiers = [el("div", "bcn-tier bcn-tier-1"), el("div", "bcn-tier bcn-tier-2"), el("div", "bcn-tier bcn-tier-3")];
-    tiers.forEach(t => frames.appendChild(t));
-    room.setAttribute("aria-label", period);
+    const members = t.members || BCN_ROLES.map(r => [r, "Sắp cập nhật", ""]);
+    const keeps = t.keepsakes || BCN_KEEPSAKES;
+    const room = el("section", "bcn-room"); room.id = `nk-${t.id}`; room.setAttribute("aria-label", period);
+    const wall = el("div", "bcn-wall"), frames = el("div", "bcn-frames"), shelf = el("div", "bcn-shelf");
     const list = [];
-    /* mỗi "vật" trên tường là 1 nút; build() trả về nội dung hiển thị khi phóng to */
     const add = (btn, label, build) => {
       btn.type = "button"; btn.setAttribute("aria-label", label); btn.setAttribute("aria-haspopup", "dialog");
       const item = { btn, build };
@@ -734,25 +784,79 @@ function initBCN() {
       btn.addEventListener("click", () => open(list, item, btn));
       return btn;
     };
+
     members.forEach(([role, name, src]) => {
       const b = el("button", "bcn-frame");
       const tag = el("span", "bcn-tag"); tag.append(el("strong", "", name), el("small", "", role));
-      b.append(bcnPhoto(src, name), tag);
-      const tier = /^Chủ nhiệm/.test(role) ? 0 : /^Phó/.test(role) ? 1 : 2;
-      tiers[tier].appendChild(add(b, `Phóng to ảnh: ${name} – ${role}`, () => [bcnPhoto(src, name), el("h2", "", name), el("p", "", `${role} · ${period}`)]));
+      b.append(bcnPhoto(src, name, t.upcoming), tag);
+      frames.appendChild(add(b, `Phóng to ảnh: ${name} – ${role}`, () => [bcnPhoto(src, name, t.upcoming), el("h2", "", name), el("p", "", `${role} · ${period}`)]));
     });
+
+    /* kệ kỷ vật: lá thư + kỷ vật 6 ban + mascot */
     const lb = el("button", "bcn-obj"); lb.innerHTML = envelope; lb.appendChild(el("small", "", "Lá thư"));
     add(lb, `Mở lá thư ${period}`, () => {
       const paper = el("div", "bcn-paper");
       (t.letter || []).forEach(p => paper.appendChild(el("p", "", p)));
       return [el("h2", "", "Thư gửi thế hệ sau"), el("p", "", period), paper];
     });
+    shelf.appendChild(lb);
+    keeps.forEach(([ban, key, desc, img]) => {
+      const kb = el("button", "bcn-obj bcn-keep");
+      const pic = img ? Object.assign(el("img", "bcn-keep-img"), { src: img, alt: `Kỷ vật ${ban}`, loading: "lazy" }) : bcnBadge(key);
+      if (img) pic.addEventListener("error", () => pic.replaceWith(bcnBadge(key)));
+      kb.append(pic, el("small", "", ban));
+      add(kb, `Xem kỷ vật ${ban} – ${period}`, () => {
+        const big = img ? Object.assign(el("img", "bcn-keep-big"), { src: img, alt: `Kỷ vật ${ban}` }) : bcnBadge(key, "bcn-badge-big");
+        return [big, el("h2", "", `Kỷ vật ${ban}`), el("p", "", period), el("p", "bcn-desc", t.upcoming ? "Kỷ vật của ban sẽ được lưu giữ tại đây." : desc)];
+      });
+      shelf.appendChild(kb);
+    });
     const mb = el("button", "bcn-obj"); mb.append(mascot("bcn-mascot-sm"), el("small", "", "Mascot"));
     add(mb, `Phóng to mascot ${period}`, () => [mascot("bcn-mascot-big"), el("h2", "", "Mascot CLB"), el("p", "", period)]);
-    shelf.append(lb, mb, el("span", "bcn-shelf-board"));
-    wall.append(el("span", "shelf-plate", period), frames, shelf);
-    room.appendChild(wall); hall.appendChild(room);
+    shelf.append(mb, el("span", "bcn-shelf-board"));
+
+    const floor = el("div", "bcn-floor"); floor.setAttribute("aria-hidden", "true");
+    const pl = el("span", "bcn-plant bcn-plant-l"), pr = el("span", "bcn-plant bcn-plant-r"); pl.innerHTML = pr.innerHTML = BCN_PLANT;
+    floor.append(pl, pr);
+    wall.append(bcnBunting(), el("span", "shelf-plate", period), frames, shelf);
+    room.append(wall, floor);
+    corridor.appendChild(room);
+
+    /* cánh cửa dẫn sang nhiệm kỳ sau */
+    const nextTerm = BCN_TERMS[ti + 1];
+    if (nextTerm) {
+      const door = el("div", "bcn-door"); door.setAttribute("aria-hidden", "true");
+      door.append(el("span", "bcn-door-arch"), el("span", "bcn-door-sign", `Nhiệm kỳ ${nextTerm.id.replace("-", " – ")} →`));
+      corridor.appendChild(door);
+    }
+    const chip = el("button", "bcn-year", t.id.replace("-", " – ")); chip.type = "button";
+    if (t.upcoming) chip.classList.add("soon");
+    chip.addEventListener("click", () => view.scrollTo({ left: room.offsetLeft - 24, behavior: reducedMotion ? "auto" : "smooth" }));
+    years.appendChild(chip);
   });
+
+  /* trạng thái nút/ nhiệm kỳ đang xem */
+  const sync = () => {
+    const max = view.scrollWidth - view.clientWidth;
+    aL.hidden = view.scrollLeft < 8; aR.hidden = view.scrollLeft > max - 8;
+    const rooms = qsa(".bcn-room", corridor), chips = qsa(".bcn-year", years);
+    let cur = 0; rooms.forEach((r, i) => { if (r.offsetLeft - 24 <= view.scrollLeft + view.clientWidth * .35) cur = i; });
+    chips.forEach((c, i) => c.classList.toggle("on", i === cur));
+  };
+  view.addEventListener("scroll", () => requestAnimationFrame(sync), { passive: true });
+  addEventListener("resize", sync); sync();
+
+  /* kéo chuột để cuộn ngang (vuốt trên cảm ứng đã có sẵn) */
+  let sx = 0, sl = 0, down = false, dragged = false;
+  view.addEventListener("pointerdown", e => { if (e.pointerType !== "mouse" || e.button !== 0) return; down = true; dragged = false; sx = e.clientX; sl = view.scrollLeft; });
+  addEventListener("pointermove", e => {
+    if (!down) return;
+    const dx = e.clientX - sx;
+    if (!dragged && Math.abs(dx) > 6) { dragged = true; view.classList.add("dragging"); }
+    if (dragged) view.scrollLeft = sl - dx;
+  });
+  addEventListener("pointerup", () => { if (!down) return; down = false; view.classList.remove("dragging"); setTimeout(() => { dragged = false; }, 0); });
+  view.addEventListener("click", e => { if (dragged) { e.stopPropagation(); e.preventDefault(); } }, true);
 
   function render() {
     stage.replaceChildren(...items[at].build());
@@ -760,9 +864,9 @@ function initBCN() {
     prev.hidden = next.hidden = items.length < 2;
   }
   function open(list, item, btn) {
-    clearTimeout(timer);                       /* mở lại ngay khi đang đóng: không bị ẩn nhầm */
+    clearTimeout(timer);
     items = list; at = list.indexOf(item); trigger = btn;
-    const r = btn.getBoundingClientRect();     /* phóng to từ đúng vị trí vật được bấm */
+    const r = btn.getBoundingClientRect();
     stage.style.setProperty("--dx", `${r.left + r.width / 2 - innerWidth / 2}px`);
     stage.style.setProperty("--dy", `${r.top + r.height / 2 - innerHeight / 2}px`);
     render();
@@ -794,6 +898,121 @@ function initBCN() {
     if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
     else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
   });
+}
+
+/* ---------- THÀNH TÍCH: phòng vinh danh giấy khen ----------
+   Thêm giấy khen = thêm 1 object vào TT_ITEMS (không cần sửa HTML/CSS):
+   { title: "Tên giấy khen", issuer: "Đơn vị trao tặng", date: "2026", level: "Cấp trường" | "Cấp tỉnh" | "Cấp Trung ương" | ...,
+     note: "Mô tả ngắn (không bắt buộc)", img: "assets/thanhtich/ten-file.jpg" }
+   - Có img: hiện ảnh giấy khen thật. Không có img: hiện mẫu giấy khen trang trí từ title.
+   - placeholder: true = mục giữ chỗ (xóa dòng này khi điền dữ liệu thật). Sắp xếp: mới nhất trước. */
+const TT_ITEMS = [
+  { title: "[Tên giấy khen 1]", issuer: "[Đơn vị trao tặng]", date: "2026", level: "Cấp Trung ương", note: "Mục giữ chỗ – thay bằng thông tin và ảnh giấy khen thật.", placeholder: true },
+  { title: "[Tên giấy khen 2]", issuer: "[Đơn vị trao tặng]", date: "2026", level: "Cấp tỉnh", note: "Mục giữ chỗ – thay bằng thông tin và ảnh giấy khen thật.", placeholder: true },
+  { title: "[Tên giấy khen 3]", issuer: "[Đơn vị trao tặng]", date: "2025", level: "Cấp tỉnh", note: "Mục giữ chỗ – thay bằng thông tin và ảnh giấy khen thật.", placeholder: true },
+  { title: "[Tên giấy khen 4]", issuer: "[Đơn vị trao tặng]", date: "2025", level: "Cấp trường", note: "Mục giữ chỗ – thay bằng thông tin và ảnh giấy khen thật.", placeholder: true },
+  { title: "[Tên giấy khen 5]", issuer: "[Đơn vị trao tặng]", date: "2024", level: "Cấp trường", note: "Mục giữ chỗ – thay bằng thông tin và ảnh giấy khen thật.", placeholder: true },
+  { title: "[Tên giấy khen 6]", issuer: "[Đơn vị trao tặng]", date: "2024", level: "Cấp trường", note: "Mục giữ chỗ – thay bằng thông tin và ảnh giấy khen thật.", placeholder: true },
+];
+const TT_LEVELS = { "Cấp Trung ương": "tw", "Cấp tỉnh": "tinh", "Cấp trường": "truong" };
+
+/* Mẫu giấy khen trang trí (co giãn theo khung nhờ đơn vị cqw) */
+function ttCert(it) {
+  const c = el("div", "tt-cert");
+  c.innerHTML = '<span class="tt-cert-corner c1"></span><span class="tt-cert-corner c2"></span><span class="tt-cert-corner c3"></span><span class="tt-cert-corner c4"></span>';
+  const body = el("div", "tt-cert-body");
+  body.append(el("small", "", "CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM"), el("b", "tt-cert-h", "GIẤY KHEN"), el("i", "tt-cert-line"),
+    el("span", "tt-cert-t", it.title), el("small", "tt-cert-s", it.issuer || ""));
+  const seal = el("span", "tt-seal"); seal.innerHTML = '<svg viewBox="0 0 40 40" aria-hidden="true"><path d="M20 6l3.8 7.7 8.5 1.2-6.2 6 1.5 8.4L20 25.3l-7.6 4 1.5-8.4-6.2-6 8.5-1.2z" fill="#fff3c4"/></svg>';
+  c.append(body, seal);
+  return c;
+}
+/* Ảnh thật nếu có; lỗi/thiếu ảnh thì dùng mẫu trang trí */
+function ttPaper(it) {
+  const p = el("span", "tt-paper");
+  if (it.img) {
+    const img = el("img"); img.src = it.img; img.alt = `Giấy khen: ${it.title}`; img.loading = "lazy"; img.decoding = "async";
+    img.addEventListener("error", () => { img.remove(); p.appendChild(ttCert(it)); });
+    p.appendChild(img);
+  } else p.appendChild(ttCert(it));
+  return p;
+}
+
+function initThanhTich() {
+  const wall = qs("#ttWall"), zoom = qs("#ttZoom");
+  if (!wall || !zoom) return;
+  const filters = qs("#ttFilters"), count = qs("#ttCount");
+  const stage = qs(".tt-stage", zoom), closeBtn = qs(".tt-close", zoom), prev = qs(".tt-prev", zoom), next = qs(".tt-next", zoom);
+  const all = [...TT_ITEMS].sort((a, b) => String(b.date).localeCompare(String(a.date), "vi", { numeric: true }));
+  const real = all.filter(i => !i.placeholder).length;
+  count.textContent = real ? `Hiện có ${real} giấy khen được trưng bày` : "Đang cập nhật – các khung bên dưới là chỗ giữ cho giấy khen thật của CLB.";
+
+  let shown = all, cur = "Tất cả", at = 0, trigger = null, timer = 0;
+  const levels = ["Tất cả", ...new Set(all.map(i => i.level).filter(Boolean))];
+  if (levels.length < 3) filters.hidden = true;
+  levels.forEach(l => {
+    const b = el("button", "tt-chip", l); b.type = "button"; b.setAttribute("aria-pressed", l === cur ? "true" : "false");
+    b.addEventListener("click", () => { cur = l; qsa(".tt-chip", filters).forEach(x => x.setAttribute("aria-pressed", String(x === b))); render(); });
+    filters.appendChild(b);
+  });
+
+  function render() {
+    shown = cur === "Tất cả" ? all : all.filter(i => i.level === cur);
+    wall.replaceChildren();
+    shown.forEach((it, i) => {
+      const card = el("button", "tt-card"); card.type = "button"; card.style.setProperty("--i", i);
+      card.setAttribute("aria-haspopup", "dialog"); card.setAttribute("aria-label", `Xem giấy khen: ${it.title}`);
+      const frame = el("span", "tt-frame"), mat = el("span", "tt-mat");
+      mat.appendChild(ttPaper(it)); frame.appendChild(mat);
+      const lv = el("span", `tt-level lv-${TT_LEVELS[it.level] || "khac"}`, it.level || "Giấy khen");
+      const plate = el("span", "tt-plate"); plate.append(el("strong", "", it.title), el("small", "", [it.issuer, it.date].filter(Boolean).join(" · ")));
+      card.append(el("span", "tt-lamp"), frame, lv, plate);
+      card.addEventListener("click", () => open(i, card));
+      wall.appendChild(card);
+    });
+    wall.appendChild(Object.assign(el("div", "tt-empty"), { innerHTML: "<span>+</span><b>Chỗ trống cho thành tích tiếp theo</b>" }));
+  }
+  function build() {
+    const it = shown[at], big = ttPaper(it); big.classList.add("tt-paper-big");
+    const meta = el("p", "tt-meta"); meta.textContent = [it.level, it.issuer, it.date].filter(Boolean).join(" · ");
+    stage.replaceChildren(big, el("h2", "", it.title), meta, ...(it.note ? [el("p", "tt-note", it.note)] : []));
+    stage.scrollTop = 0; prev.hidden = next.hidden = shown.length < 2;
+  }
+  function open(i, btn) {
+    clearTimeout(timer); at = i; trigger = btn;
+    const r = btn.getBoundingClientRect();
+    stage.style.setProperty("--dx", `${r.left + r.width / 2 - innerWidth / 2}px`);
+    stage.style.setProperty("--dy", `${r.top + r.height / 2 - innerHeight / 2}px`);
+    build(); zoom.hidden = false; void zoom.offsetWidth; zoom.classList.add("show");
+    document.body.classList.add("bcn-lock"); closeBtn.focus({ preventScroll: true });
+  }
+  function close() {
+    if (zoom.hidden || !zoom.classList.contains("show")) return;
+    zoom.classList.remove("show"); document.body.classList.remove("bcn-lock");
+    timer = setTimeout(() => { zoom.hidden = true; }, reducedMotion ? 0 : 380);
+    trigger?.focus({ preventScroll: true });
+  }
+  const step = d => { at = (at + d + shown.length) % shown.length; build(); };
+  closeBtn.addEventListener("click", close); prev.addEventListener("click", () => step(-1)); next.addEventListener("click", () => step(1));
+  zoom.addEventListener("click", e => { if (e.target === zoom) close(); });
+  document.addEventListener("keydown", e => {
+    if (zoom.hidden || !zoom.classList.contains("show")) return;
+    if (e.key === "Escape") return close();
+    if (e.key === "ArrowLeft" && shown.length > 1) return step(-1);
+    if (e.key === "ArrowRight" && shown.length > 1) return step(1);
+    if (e.key !== "Tab") return;
+    const f = qsa("button:not([hidden])", zoom), first = f[0], last = f[f.length - 1];
+    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+  });
+  render();
+
+  /* tia sáng lấp lánh ở phần đầu trang */
+  const sp = qs(".tt-sparks");
+  if (sp && !reducedMotion) for (let i = 0; i < 22; i++) {
+    const d = el("i"); d.style.cssText = `left:${Math.random() * 100}%;top:${Math.random() * 100}%;--d:${(3 + Math.random() * 4).toFixed(1)}s;--l:${(Math.random() * 5).toFixed(1)}s;--s:${(2 + Math.random() * 3).toFixed(1)}px`;
+    sp.appendChild(d);
+  }
 }
 
 /* Intro: chỉ hiện 1 lần mỗi phiên (quay lại "Trang chủ" không bị chặn nữa), đóng ngay khi bấm,
@@ -845,7 +1064,7 @@ function init() {
     initSocialHub, initMagneticButtons, initConfettiBurst, initCardTilt,
     initParallax, initParticles, initScrollProgress, initBackToTop,
     initActiveNavigation, initReducedMotion, initLoading, initLazyImages,
-    initMissingAssets, initIntro, initBCN, initVisibilityPause, initBackgroundMusic
+    initMissingAssets, initIntro, initBCN, initThanhTich, initVisibilityPause, initBackgroundMusic
   ].forEach(fn => {
     try { fn(); } catch (err) { console.warn(`[${fn.name}]`, err); }
   });
