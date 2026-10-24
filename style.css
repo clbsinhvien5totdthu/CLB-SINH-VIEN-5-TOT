@@ -1256,3 +1256,11 @@ body.bcn-lock { overflow: hidden; }
 .tt-close:focus-visible, .tt-step:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
 @media (max-width: 560px) { .tt-step { top: auto; bottom: 14px; margin: 0; } .tt-wall { gap: 8px; } }
 @media (prefers-reduced-motion: reduce) { .tt-card, .tt-trophy, .tt-beams i, .tt-sparks i, .tt-stage, .tt-zoom { animation: none !important; transition: none !important; } .tt-card { opacity: 1; } }
+
+/* cúp 3D (three.js) – có WebGL thì ẩn hình SVG dự phòng */
+.tt-stage3d { display: none; position: relative; width: clamp(230px, 30vw, 340px); aspect-ratio: 1 / 1.12; margin: -6px 0 -18px; cursor: grab; touch-action: pan-y; }
+.tt-stage3d.grabbing { cursor: grabbing; }
+.tt-stage3d canvas { display: block; width: 100%; height: 100%; }
+.tt-stage3d::after { content: ""; position: absolute; left: 14%; right: 14%; bottom: 3%; height: 7%; border-radius: 50%; background: radial-gradient(ellipse, rgba(242,193,75,.45), transparent 70%); filter: blur(6px); pointer-events: none; }
+.tt-hero.has3d .tt-stage3d { display: block; }
+.tt-hero.has3d .tt-trophy { display: none; }
